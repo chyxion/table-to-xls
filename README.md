@@ -1,10 +1,10 @@
 #Table To Xls
 ## Preview
-![HTML Table](raw/master/xls.png)
+![HTML Table](../raw/master/html.png)
 
 Result
 
-![XLS Result](raw/master/data.png)
+![XLS Result](../raw/master/xls.png)
 
 ## Usage
 ```java
