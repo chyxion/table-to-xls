@@ -1,10 +1,10 @@
 #Table To Xls
 ## Preview
-![HTML Table](../raw/master/html.png)
+![HTML Table](http://git.oschina.net/chyxion/table-to-xls/raw/master/html.png)
 
 Result
 
-![XLS Result](../raw/master/xls.png)
+![XLS Result](http://git.oschina.net/chyxion/table-to-xls/raw/master/xls.png)
 
 ## Usage
 ```java
