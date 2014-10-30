@@ -36,9 +36,8 @@ public class WidthApplier implements CssApplier {
 	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
 	 */
     @Override
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
-            Map<String, String> style) {
-    	int width = CssUtils.getInt(style.get(WIDTH)) * 256;
+    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
+    	int width = Math.round(CssUtils.getInt(style.get(WIDTH)) * 2048 / 8.43F);
     	HSSFSheet sheet = cell.getSheet();
     	int colIndex = cell.getColumnIndex();
     	if (width > sheet.getColumnWidth(colIndex)) {

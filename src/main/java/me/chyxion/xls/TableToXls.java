@@ -10,6 +10,7 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.support.AlignApplier;
 import me.chyxion.xls.css.support.BackgroundApplier;
 import me.chyxion.xls.css.support.BorderApplier;
+import me.chyxion.xls.css.support.HeightApplier;
 import me.chyxion.xls.css.support.TextApplier;
 import me.chyxion.xls.css.support.WidthApplier;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +42,7 @@ public class TableToXls {
 		STYLE_APPLIERS.add(new AlignApplier());
 		STYLE_APPLIERS.add(new BackgroundApplier());
 		STYLE_APPLIERS.add(new WidthApplier());
+		STYLE_APPLIERS.add(new HeightApplier());
 		STYLE_APPLIERS.add(new BorderApplier());
 		STYLE_APPLIERS.add(new TextApplier());
 	}
@@ -49,6 +51,7 @@ public class TableToXls {
 	private Map<String, Object> cellsOccupied = new HashMap<String, Object>();
 	private Map<String, HSSFCellStyle> cellStyles = new HashMap<String, HSSFCellStyle>();
 	private HSSFCellStyle defaultCellStyle;
+	private int maxRow = 0;
 	// init
 	{
 		sheet = workBook.createSheet();
@@ -72,13 +75,17 @@ public class TableToXls {
 		defaultCellStyle.setLeftBorderColor(black);
 	}
 	
-	public static byte[] convert(String html) {
-		return new TableToXls().doConvert(html);
+	public static byte[] process(CharSequence html) {
+		return new TableToXls().doProcess(html.toString());
 	}
 
-	private byte[] doConvert(String html) {
-		Element table = Jsoup.parseBodyFragment(html).select("table").first();
+	private void processTable(Element table) {
 		int rowIndex = 0;
+		if (maxRow > 0) {
+			// blank row
+			maxRow += 2;
+			rowIndex = maxRow;
+		}
 		log.info("Interate Table Rows.");
 		for (Element row : table.select("tr")) {
 			log.info("Parse Table Row [{}]. Row Index [{}].", row, rowIndex);
@@ -128,6 +135,12 @@ public class TableToXls {
 			}
 			++rowIndex;
 		}
+	}
+
+	private byte[] doProcess(String html) {
+		for (Element table : Jsoup.parseBodyFragment(html).select("table")) {
+	        processTable(table);
+        }
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			workBook.write(baos);
@@ -262,13 +275,16 @@ public class TableToXls {
     	if (row == null) {
     		log.info("Create New Row [{}].", rowIndex);
     		row = sheet.createRow(rowIndex);
+    		if (rowIndex > maxRow) {
+    			maxRow = rowIndex;
+    		}
     	}
 	    return row;
     }
 
     private void mergeRegion(int firstRow, int lastRow, int firstCol, int lastCol) {
-    	log.info("Merge Region, From Row [{}], To [{}].", firstRow, lastRow);
-    	log.info("From Col [{}], To [{}].", firstCol, lastCol);
+    	log.debug("Merge Region, From Row [{}], To [{}].", firstRow, lastRow);
+    	log.debug("From Col [{}], To [{}].", firstCol, lastCol);
     	sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
     }
 }

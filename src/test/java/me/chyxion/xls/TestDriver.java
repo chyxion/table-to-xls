@@ -1,8 +1,7 @@
 package me.chyxion.xls;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import org.apache.commons.io.IOUtils;
+import java.util.Scanner;
 import org.junit.Test;
 
 /**
@@ -16,21 +15,14 @@ public class TestDriver {
 
 	@Test
 	public void run() throws Exception {
-		IOUtils.write(TableToXls.convert(IOUtils.toString(new FileInputStream("E:/table.html"))), 
-				new FileOutputStream("E:/data.xls"));
-	}
-
-	@Test
-	public void testSplit() {
-		String[] ss = ":".split("\\s*\\:\\s*");
-		System.err.println(ss.length);
-		for (String s : ss) {
-			System.err.println(s);
-        }
-		ss = "  a  :  b  ".split("\\s*\\:\\s*");
-		System.err.println(ss.length);
-		for (String s : ss) {
-			System.err.println(s);
-        }
+		StringBuilder html = new StringBuilder();
+		Scanner s = new Scanner(getClass().getResourceAsStream("/sample.html"), "utf-8");
+		while (s.hasNext()) {
+			html.append(s.nextLine());
+		}
+		s.close();
+		FileOutputStream fout = new FileOutputStream("data.xls");
+		fout.write(TableToXls.process(html));
+		fout.close();
 	}
 }

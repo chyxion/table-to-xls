@@ -65,7 +65,7 @@ public class CssUtils {
     public static int getInt(String strValue) {
     	int value = 0;
     	if (StringUtils.isNotBlank(strValue)) {
-    		Matcher m = Pattern.compile("^(\\d+)(?:\\w+|%)$").matcher(strValue);
+    		Matcher m = Pattern.compile("^(\\d+)(?:\\w+|%)?$").matcher(strValue);
     		if (m.find()) {
     			value = Integer.parseInt(m.group(1));
     		}

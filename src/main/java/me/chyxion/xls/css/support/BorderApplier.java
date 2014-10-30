@@ -23,6 +23,33 @@ import me.chyxion.xls.css.CssUtils;
  */
 public class BorderApplier implements CssApplier {
 	private static final Logger log = LoggerFactory.getLogger(BorderApplier.class);
+	// border styles
+	private final static String[] BORDER_STYLES = new String[] {
+        // Default value Specifies no border	 
+         "none",
+        // The same as "none", except in border conflict resolution for table elements	 
+         "hidden",
+        // Specifies a dotted border	 
+         "dotted",
+        // Specifies a dashed border	 
+         "dashed",
+        // Specifies a solid border	 
+         "solid",
+        // Specifies a double border	 
+         "double",
+        // Specifies a 3D grooved border  
+         "groove",
+        // Specifies a 3D ridged border  
+         "ridge",
+        // Specifies a 3D inset border  
+         "inset",
+        // Specifies a 3D outset border  
+         "outset",
+        // Sets this property to its default value 
+         "initial",
+        // Inherits this property from its parent element 
+         "inherit"
+	};
 
 	/* (non-Javadoc)
 	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
@@ -57,8 +84,7 @@ public class BorderApplier implements CssApplier {
 	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
 	 */
     @Override
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
-            Map<String, String> style) {
+    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	for (String pos : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
     		String posName = StringUtils.capitalize(pos.toLowerCase());
     		// color

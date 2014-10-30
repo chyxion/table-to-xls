@@ -9,6 +9,15 @@
     <name>Table To XLS</name>
     <description>Table To XLS</description>
 
+	<developers>
+		<developer>
+			<id>chyxion</id>
+			<name>Shaun Chyxion</name>
+			<email>chyxion@163.com</email>
+			<url>http://chyxion.github.io</url>
+		</developer>
+	</developers>
+
     <dependencies>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -16,19 +25,14 @@
             <version>1.8.1</version>
         </dependency>
 		<dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.10.1</version>
+        </dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
-		</dependency>
-		<dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.2</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
 		</dependency>
 		<dependency>
             <groupId>org.slf4j</groupId>
@@ -36,15 +40,16 @@
             <version>1.7.7</version>
         </dependency>
 		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>3.10.1</version>
-        </dependency>
     </dependencies>
 </project>

@@ -25,9 +25,9 @@ public class HeightApplier implements CssApplier {
     @Override
     public Map<String, String> parse(Map<String, String> style) {
     	Map<String, String> mapRtn = new HashMap<String, String>();
-    	String width = style.get(HEIGHT);
-    	if (CssUtils.isNum(width)) {
-    		mapRtn.put(HEIGHT, width);
+    	String height = style.get(HEIGHT);
+    	if (CssUtils.isNum(height)) {
+    		mapRtn.put(HEIGHT, height);
     	}
 	    return mapRtn;
     }
@@ -36,9 +36,8 @@ public class HeightApplier implements CssApplier {
 	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
 	 */
     @Override
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
-            Map<String, String> style) {
-    	int height = CssUtils.getInt(style.get(HEIGHT));
+    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
+    	int height = Math.round(CssUtils.getInt(style.get(HEIGHT)) * 255 / 12.75F);
     	HSSFRow row = cell.getRow();
     	if (height > row.getHeight()) {
     		row.setHeight((short) height);

@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.hssf.util.HSSFColor.BLACK;
 import org.apache.poi.ss.usermodel.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,9 @@ import me.chyxion.xls.css.CssUtils;
 public class TextApplier implements CssApplier {
 	private static final Logger log = LoggerFactory.getLogger(TextApplier.class);
 
+	private static final String TEXT_DECORATION = "text-decoration";
+	private static final String UNDERLINE = "underline"; 
+
 	/* (non-Javadoc)
 	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
 	 */
@@ -37,19 +43,71 @@ public class TextApplier implements CssApplier {
     	String color = CssUtils.processColor(style.get(COLOR));
     	if (StringUtils.isNotBlank(color)) {
     		log.debug("Text Color [{}] Found.", color);
-    		if (Integer.parseInt(color.substring(1), 16) > 
-    			Integer.parseInt("444444", 16)) {
-    			mapRtn.put(COLOR, color);
+    		mapRtn.put(COLOR, color);
+    	}
+    	// font
+    	parseFontAttr(style, mapRtn);
+    	// text text-decoration
+    	if (UNDERLINE.equals(style.get(TEXT_DECORATION))) {
+    		mapRtn.put(TEXT_DECORATION, UNDERLINE);
+    	}
+	    return mapRtn;
+    }
+
+	/* (non-Javadoc)
+	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
+	 */
+    @Override
+    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
+    	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
+    	HSSFFont font = null;
+    	if (ITALIC.equals(style.get(FONT_STYLE))) {
+    		font = getFont(cell, font);
+    		font.setItalic(true);
+    	}
+    	int fontSize = CssUtils.getInt(style.get(FONT_SIZE));
+    	if (fontSize > 0) {
+    		font = getFont(cell, font);
+    		font.setFontHeightInPoints((short) fontSize);
+    	}
+    	if (BOLD.equals(style.get(FONT_WEIGHT))) {
+    		font = getFont(cell, font);
+    		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    	}
+    	String fontFamily = style.get(FONT_FAMILY);
+    	if (StringUtils.isNotBlank(fontFamily)) {
+    		font = getFont(cell, font);
+    		font.setFontName(fontFamily);
+    	}
+    	HSSFColor color = CssUtils.parseColor(workBook, style.get(COLOR));
+    	if (color != null) {
+    		if (color.getIndex() != BLACK.index) {
+    			font = getFont(cell, font);
+    			font.setColor(color.getIndex());
     		}
     		else {
-    			log.debug("Color [{}] Is Familiar To Black, Ignore.", color);
+    			log.info("Text Color [{}] Is Black Or Fimiliar To Black, Ignore.", 
+    					style.remove(COLOR));
     		}
     	}
+    	// text-decoration
+    	String textDecoration = style.get(TEXT_DECORATION);
+    	if (UNDERLINE.equals(textDecoration)) {
+    		font = getFont(cell, font);
+    		font.setUnderline(Font.U_SINGLE);
+    	}
+
+    	if (font != null) {
+    		cellStyle.setFont(font);
+    	}
+    }
+
+    private Map<String, String> parseFontAttr(Map<String, String> style, Map<String, String> mapRtn) {
     	// font
     	String font = style.get(FONT);
     	if (StringUtils.isNotBlank(font)) {
     		log.debug("Parse Font Attr [{}].", font);
-    		String[] ignoreStyle = new String[] {
+    		String[] ignoreStyles = new String[] {
     			"normal",
     			"small\\-caps",
     			"caption",
@@ -62,7 +120,7 @@ public class TextApplier implements CssApplier {
     			"[1-3]00"
     		};
     		StringBuffer sbFont = new StringBuffer(
-    			font.replaceAll("^|\\s*" + StringUtils.join(ignoreStyle, "|") + "\\s+|$", " "));
+    			font.replaceAll("^|\\s*" + StringUtils.join(ignoreStyles, "|") + "\\s+|$", " "));
     		log.debug("Font Attr [{}] After Process Ingore.", sbFont);
     		// style
     		Matcher m = Pattern.compile("(?:^|\\s+)(italic|oblique)(?:\\s+|$)")
@@ -77,7 +135,7 @@ public class TextApplier implements CssApplier {
     			m.appendTail(sbFont);
     		}
     		// weight
-    		m = Pattern.compile("(?:^|\\s+)(bold|[4-9]00)(?:\\s+|$)")
+    		m = Pattern.compile("(?:^|\\s+)(bold(?:er)?|[7-9]00)(?:\\s+|$)")
     				.matcher(sbFont.toString());
     		if (m.find()) {
     			sbFont.setLength(0);
@@ -138,42 +196,24 @@ public class TextApplier implements CssApplier {
     			mapRtn.put(FONT_FAMILY, fontFamily);
     		}
     	}
-	    return mapRtn;
-    }
-
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
-    @Override
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
-    	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
-    	HSSFFont font = null;
-    	if (ITALIC.equals(style.get(FONT_STYLE))) {
-    		font = getFont(cell, font);
-    		font.setItalic(true);
+    	font = style.get(FONT_STYLE);
+    	if (ArrayUtils.contains(new String[] {ITALIC, "oblique"}, font)) {
+    		mapRtn.put(FONT_STYLE, ITALIC);
     	}
-    	int fontSize = CssUtils.getInt(style.get(FONT_SIZE));
-    	if (fontSize > 0) {
-    		font = getFont(cell, font);
-    		font.setFontHeightInPoints((short) fontSize);
+    	font = style.get(FONT_WEIGHT);
+    	if (StringUtils.isNotBlank(font) && 
+    			Pattern.matches("^bold(?:er)?|[7-9]00$", font)) {
+    		mapRtn.put(FONT_WEIGHT, BOLD);
     	}
-    	if (BOLD.equals(style.get(FONT_WEIGHT))) {
-    		font = getFont(cell, font);
-    		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    	font = style.get(FONT_SIZE);
+    	if (CssUtils.isNum(font)) {
+    		mapRtn.put(FONT_SIZE, font);
     	}
-    	String fontFamily = style.get(FONT_FAMILY);
-    	if (StringUtils.isNotBlank(fontFamily)) {
-    		font = getFont(cell, font);
-    		font.setFontName(fontFamily);
+    	font = style.get(FONT_FAMILY);
+    	if (StringUtils.isNotBlank(font)) {
+    		mapRtn.put(FONT_FAMILY, font);
     	}
-    	HSSFColor color = CssUtils.parseColor(workBook, style.get(COLOR));
-    	if (color != null) {
-    		font = getFont(cell, font);
-    		font.setColor(color.getIndex());
-    	}
-    	if (font != null) {
-    		cellStyle.setFont(font);
-    	}
+    	return mapRtn;
     }
 
     HSSFFont getFont(HSSFCell cell, HSSFFont font) {
