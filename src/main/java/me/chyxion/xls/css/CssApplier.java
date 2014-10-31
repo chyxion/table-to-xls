@@ -5,8 +5,8 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 
 /**
- * @version 0.1
- * @since 0.1
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 2:10:28 PM
@@ -31,7 +31,6 @@ public interface CssApplier {
 	String FONT_STYLE = "font-style";
 	String FONT_WEIGHT = "font-weight";
 	String FONT_SIZE = "font-size";
-	String LINE_HEIGHT = "line-height";
 	String FONT_FAMILY = "font-family";
 	String ITALIC = "italic";
 	String BOLD = "bold";
@@ -40,8 +39,8 @@ public interface CssApplier {
 	String VETICAL_ALIGN = "vertical-align";
 	String BACKGROUND = "background";
 	String BACKGROUND_COLOR = "background-color";
-	// methods
 
+	// methods
 	/**
 	 * parse css styles
 	 * @param style

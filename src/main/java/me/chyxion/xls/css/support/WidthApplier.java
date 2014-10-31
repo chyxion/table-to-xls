@@ -11,8 +11,8 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.CssUtils;
 
 /**
- * @version 0.1
- * @since 0.1
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 5:14:22 PM

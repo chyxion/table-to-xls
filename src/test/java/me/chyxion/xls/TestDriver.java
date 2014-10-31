@@ -5,8 +5,8 @@ import java.util.Scanner;
 import org.junit.Test;
 
 /**
- * @version 0.1
- * @since 0.1
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 2:07:51 PM

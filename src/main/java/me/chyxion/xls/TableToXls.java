@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @version 0.1
- * @since 0.1
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 2:09:02 PM

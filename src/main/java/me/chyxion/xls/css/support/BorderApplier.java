@@ -15,40 +15,36 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.CssUtils;
 
 /**
- * @version 0.1
- * @since 0.1
+ * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br />
+ * border-style: none | hidden | dotted | dashed | solid | double
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 5:21:51 PM
  */
 public class BorderApplier implements CssApplier {
 	private static final Logger log = LoggerFactory.getLogger(BorderApplier.class);
+	private static final String NONE = "none";
+	private static final String HIDDEN = "hidden";
+	private static final String SOLID = "solid";
+	private static final String DOUBLE = "double";
+	private static final String DOTTED = "dotted";
+	private static final String DASHED = "dashed";
 	// border styles
 	private final static String[] BORDER_STYLES = new String[] {
-        // Default value Specifies no border	 
-         "none",
-        // The same as "none", except in border conflict resolution for table elements	 
-         "hidden",
+        // Specifies no border	 
+         NONE,
+        // The same as "none", except in border conflict resolution for table elements
+         HIDDEN,
         // Specifies a dotted border	 
-         "dotted",
+         DOTTED,
         // Specifies a dashed border	 
-         "dashed",
+         DASHED,
         // Specifies a solid border	 
-         "solid",
+         SOLID,
         // Specifies a double border	 
-         "double",
-        // Specifies a 3D grooved border  
-         "groove",
-        // Specifies a 3D ridged border  
-         "ridge",
-        // Specifies a 3D inset border  
-         "inset",
-        // Specifies a 3D outset border  
-         "outset",
-        // Sets this property to its default value 
-         "initial",
-        // Inherits this property from its parent element 
-         "inherit"
+         DOUBLE
 	};
 
 	/* (non-Javadoc)
@@ -117,16 +113,16 @@ public class BorderApplier implements CssApplier {
     				shortValue = CellStyle.BORDER_THIN;
     			}
     		}
-    		else if ("none".equals(styleValue)) {
+    		else if (ArrayUtils.contains(new String[] {NONE, HIDDEN}, styleValue)) {
     			shortValue = CellStyle.BORDER_NONE;
     		}
-    		else if ("double".equals(styleValue)) {
+    		else if (DOUBLE.equals(styleValue)) {
     			shortValue = CellStyle.BORDER_DOUBLE;
     		}
-    		else if ("doted".equals(styleValue)) {
+    		else if (DOTTED.equals(styleValue)) {
     			shortValue = CellStyle.BORDER_DOTTED;
     		}
-    		else if ("dashed".equals(styleValue)) {
+    		else if (DASHED.equals(styleValue)) {
     			if (width > 1) {
     				shortValue = CellStyle.BORDER_MEDIUM_DASHED;
     			}
@@ -162,18 +158,12 @@ public class BorderApplier implements CssApplier {
     				setBorderAttr(mapBorder, pos, STYLE, borderAttr);
     			}
     			else {
-    				log.warn("Unknow Border Attr [{}].", borderAttr);
+    				log.info("Border Attr [{}] Is Not Suppoted.", borderAttr);
     			}
     		}
     	}
     }
 
-	/**
-	 * @param mapBorder
-	 * @param pos
-	 * @param color
-	 * @param borderColor
-	 */
     private void setBorderAttr(Map<String, String> mapBorder, String pos,
             String attr, String value) {
     	if (StringUtils.isNotBlank(pos)) {

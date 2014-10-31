@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -20,8 +19,18 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.CssUtils;
 
 /**
- * @version 0.1
- * @since 0.1
+ * supports: <br />
+ * color: name | #rgb | #rrggbb | rgb(r, g, b) <br />
+ * text-decoration: underline; <br />
+ * font-style: italic | oblique; <br />
+ * font-weight:  bold | bolder | 700 | 800 | 900; <br />
+ * font-size: length; length unit will be ignored, 
+ * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br />
+ * font：[[ font-style || font-variant || font-weight ]? font-size [/line-height]? font-family] 
+ * | caption | icon | menu | message-box | small-caption | status-bar;
+ * [font-variant, line-height, caption, icon, menu, message-box, small-caption, status-bar] will be ignored.
+ * @version 0.0.1
+ * @since 0.0.1
  * @author Shaun Chyxion <br />
  * chyxion@163.com <br />
  * Oct 24, 2014 5:21:30 PM
@@ -105,18 +114,16 @@ public class TextApplier implements CssApplier {
     private Map<String, String> parseFontAttr(Map<String, String> style, Map<String, String> mapRtn) {
     	// font
     	String font = style.get(FONT);
-    	if (StringUtils.isNotBlank(font)) {
+    	if (StringUtils.isNotBlank(font) && 
+    			!ArrayUtils.contains(new String[] {
+    				"small-caps", "caption",
+    				"icon", "menu", "message-box", 
+    				"small-caption", "status-bar"
+    			}, font)) {
     		log.debug("Parse Font Attr [{}].", font);
     		String[] ignoreStyles = new String[] {
     			"normal",
-    			"small\\-caps",
-    			"caption",
-    			"icon",
-    			"menu", 
-    			"message\\-box",
-    			"small\\-caption",
-    			"status-bar",
-    			// font weight
+    			// font weight normal
     			"[1-3]00"
     		};
     		StringBuffer sbFont = new StringBuffer(
@@ -140,7 +147,7 @@ public class TextApplier implements CssApplier {
     		if (m.find()) {
     			sbFont.setLength(0);
     			if (log.isDebugEnabled()) {
-    				log.debug("Font Weight [{}] Found.", m.group(1));
+    				log.debug("Font Weight [{}](bold) Found.", m.group(1));
     			}
     			mapRtn.put(FONT_WEIGHT, BOLD);
     			m.appendReplacement(sbFont, " ");
@@ -174,14 +181,12 @@ public class TextApplier implements CssApplier {
     					mapRtn.put(FONT_SIZE, fontSize);
     				}
     				else {
-    					log.warn("Font Size [{}] Not Suppoted, Ignore.", fontSize);
+    					log.info("Font Size [{}] Not Supported, Ignore.", fontSize);
     				}
     			}
     			String lineHeight = m.group(2);
     			if (StringUtils.isNotBlank(lineHeight)) {
-    				lineHeight = StringUtils.deleteWhitespace(lineHeight);
-    				log.debug("Line Height [{}].", lineHeight);
-    				mapRtn.put(LINE_HEIGHT, lineHeight);
+    				log.info("Line Height [{}] Not Supported, Ignore.", lineHeight);
     			}
     			m.appendReplacement(sbFont, " ");
     			m.appendTail(sbFont);
@@ -198,19 +203,23 @@ public class TextApplier implements CssApplier {
     	}
     	font = style.get(FONT_STYLE);
     	if (ArrayUtils.contains(new String[] {ITALIC, "oblique"}, font)) {
+    		log.debug("Font Italic [{}] Found.", font);
     		mapRtn.put(FONT_STYLE, ITALIC);
     	}
     	font = style.get(FONT_WEIGHT);
     	if (StringUtils.isNotBlank(font) && 
     			Pattern.matches("^bold(?:er)?|[7-9]00$", font)) {
+    		log.debug("Font Weight [{}](bold) Found.", font);
     		mapRtn.put(FONT_WEIGHT, BOLD);
     	}
     	font = style.get(FONT_SIZE);
     	if (CssUtils.isNum(font)) {
+    		log.debug("Font Size [{}] Found.", font);
     		mapRtn.put(FONT_SIZE, font);
     	}
     	font = style.get(FONT_FAMILY);
     	if (StringUtils.isNotBlank(font)) {
+    		log.debug("Font Family [{}] Found.", font);
     		mapRtn.put(FONT_FAMILY, font);
     	}
     	return mapRtn;
