@@ -53,8 +53,7 @@ public class BackgroundApplier implements CssApplier {
 	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
 	 */
     @Override
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
-            Map<String, String> style) {
+    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	String bgColor = style.get(BACKGROUND_COLOR);
     	if (StringUtils.isNotBlank(bgColor)) {
     		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
