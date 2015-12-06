@@ -138,6 +138,9 @@ public class CssUtils {
     	return poiColor;
     }
 
+    // --
+    // private methods
+
     private static HSSFColor getColor(String color) {
     	return colors.get(color.replace("_", ""));
     }

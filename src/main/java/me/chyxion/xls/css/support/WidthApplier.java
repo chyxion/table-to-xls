@@ -19,8 +19,8 @@ import me.chyxion.xls.css.CssUtils;
  */
 public class WidthApplier implements CssApplier {
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
     @Override
     public Map<String, String> parse(Map<String, String> style) {
@@ -32,9 +32,9 @@ public class WidthApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	int width = Math.round(CssUtils.getInt(style.get(WIDTH)) * 2048 / 8.43F);

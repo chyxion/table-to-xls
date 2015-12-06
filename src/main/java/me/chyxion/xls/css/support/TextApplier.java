@@ -36,13 +36,14 @@ import me.chyxion.xls.css.CssUtils;
  * Oct 24, 2014 5:21:30 PM
  */
 public class TextApplier implements CssApplier {
-	private static final Logger log = LoggerFactory.getLogger(TextApplier.class);
+	private static final Logger log = 
+		LoggerFactory.getLogger(TextApplier.class);
 
 	private static final String TEXT_DECORATION = "text-decoration";
 	private static final String UNDERLINE = "underline"; 
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
     @Override
     public Map<String, String> parse(Map<String, String> style) {
@@ -63,9 +64,9 @@ public class TextApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
@@ -110,6 +111,9 @@ public class TextApplier implements CssApplier {
     		cellStyle.setFont(font);
     	}
     }
+
+    // --
+    // private methods
 
     private Map<String, String> parseFontAttr(Map<String, String> style, Map<String, String> mapRtn) {
     	// font

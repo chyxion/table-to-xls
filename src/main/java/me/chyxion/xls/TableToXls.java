@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
  * Oct 24, 2014 2:09:02 PM
  */
 public class TableToXls {
-	private static final Logger log = LoggerFactory.getLogger(TableToXls.class);
-	private static final List<CssApplier> STYLE_APPLIERS = new LinkedList<CssApplier>();
+	private static final Logger log = 
+		LoggerFactory.getLogger(TableToXls.class);
+	private static final List<CssApplier> STYLE_APPLIERS = 
+		new LinkedList<CssApplier>();
 	// static init
 	static {
 		STYLE_APPLIERS.add(new AlignApplier());

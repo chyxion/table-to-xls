@@ -18,8 +18,8 @@ import me.chyxion.xls.css.CssUtils;
  */
 public class BackgroundApplier implements CssApplier {
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
     @Override
     public Map<String, String> parse(Map<String, String> style) {
@@ -49,9 +49,9 @@ public class BackgroundApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	String bgColor = style.get(BACKGROUND_COLOR);

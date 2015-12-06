@@ -47,8 +47,8 @@ public class BorderApplier implements CssApplier {
          DOUBLE
 	};
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
     @Override
     public Map<String, String> parse(Map<String, String> style) {
@@ -76,9 +76,9 @@ public class BorderApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	for (String pos : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
@@ -143,7 +143,10 @@ public class BorderApplier implements CssApplier {
     		}
     	}
     }
-    
+
+    // --
+    // private methods
+
     private void setBorderAttr(Map<String, String> mapBorder, String pos, String value) {
     	if (StringUtils.isNotBlank(value)) {
     		String borderColor = null;
