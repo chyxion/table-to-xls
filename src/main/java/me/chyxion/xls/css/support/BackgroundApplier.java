@@ -1,19 +1,19 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import me.chyxion.xls.css.CssUtils;
+import me.chyxion.xls.css.CssApplier;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.usermodel.CellStyle;
-import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.CssUtils;
 
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 5:03:32 PM
  */
 public class BackgroundApplier implements CssApplier {
@@ -21,7 +21,6 @@ public class BackgroundApplier implements CssApplier {
 	/**
 	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	Map<String, String> mapRtn = new HashMap<String, String>();
     	String bg = style.get(BACKGROUND);
@@ -52,7 +51,6 @@ public class BackgroundApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	String bgColor = style.get(BACKGROUND_COLOR);
     	if (StringUtils.isNotBlank(bgColor)) {

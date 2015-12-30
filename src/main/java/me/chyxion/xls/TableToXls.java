@@ -1,37 +1,39 @@
 package me.chyxion.xls;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
+import org.jsoup.Jsoup;
+import java.util.Arrays;
+import org.slf4j.Logger;
+import java.util.HashMap;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.io.OutputStream;
+import org.slf4j.LoggerFactory;
+import org.jsoup.nodes.Element;
+import java.io.ByteArrayOutputStream;
 import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.support.AlignApplier;
-import me.chyxion.xls.css.support.BackgroundApplier;
-import me.chyxion.xls.css.support.BorderApplier;
-import me.chyxion.xls.css.support.HeightApplier;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFCell;
 import me.chyxion.xls.css.support.TextApplier;
 import me.chyxion.xls.css.support.WidthApplier;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import me.chyxion.xls.css.support.AlignApplier;
+import me.chyxion.xls.css.support.BorderApplier;
+import me.chyxion.xls.css.support.HeightApplier;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import me.chyxion.xls.css.support.BackgroundApplier;
 
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 2:09:02 PM
  */
 public class TableToXls {
@@ -76,10 +78,43 @@ public class TableToXls {
 		defaultCellStyle.setBorderLeft(thin);
 		defaultCellStyle.setLeftBorderColor(black);
 	}
-	
+
+	/**
+	 * process html to xls
+	 * @param html html char sequence 
+	 * @return xls bytes
+	 */
 	public static byte[] process(CharSequence html) {
-		return new TableToXls().doProcess(html.toString());
+		ByteArrayOutputStream baos = null;
+		try {
+			baos = new ByteArrayOutputStream();
+			process(html, baos);
+			return baos.toByteArray();
+		}
+		finally {
+			if (baos != null) {
+				try {
+					baos.close();
+				}
+				catch (IOException e) {
+					log.warn("Close Byte Array Inpout Stream Error Caused.", e);
+				}
+			}
+		}
 	}
+
+	/**
+	 * process html to output stream
+	 * @param html html char sequence 
+	 * @param output output stream
+	 */
+	public static void process(CharSequence html, OutputStream output) {
+		new TableToXls().doProcess(
+			html instanceof String ? (String) html : html.toString(), output);
+	}
+
+	// --
+	// private methods
 
 	private void processTable(Element table) {
 		int rowIndex = 0;
@@ -139,17 +174,15 @@ public class TableToXls {
 		}
 	}
 
-	private byte[] doProcess(String html) {
+	private void doProcess(String html, OutputStream output) {
 		for (Element table : Jsoup.parseBodyFragment(html).select("table")) {
 	        processTable(table);
         }
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			workBook.write(baos);
-			return baos.toByteArray();
+			workBook.write(output);
 		}
-		catch (Exception e) {
-			throw new RuntimeException("Table To XLS, IO ERROR.", e);
+		catch (IOException e) {
+			throw new IllegalStateException("Table To XLS, IO ERROR.", e);
 		}
 	}
 

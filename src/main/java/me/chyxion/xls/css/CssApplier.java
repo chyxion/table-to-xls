@@ -7,8 +7,8 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 2:10:28 PM
  */
 public interface CssApplier {
@@ -43,16 +43,16 @@ public interface CssApplier {
 	// methods
 	/**
 	 * parse css styles
-	 * @param style
-	 * @return
+	 * @param style style to parse
+	 * @return parse result
 	 */
 	Map<String, String> parse(Map<String, String> style);
 
 	/**
 	 * apply styles
-	 * @param cell
-	 * @param cellStyle
-	 * @param style
+	 * @param cell cell to apply style
+	 * @param cellStyle cell style
+	 * @param style style
 	 */
 	void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style);
 }

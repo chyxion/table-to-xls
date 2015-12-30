@@ -15,12 +15,12 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.CssUtils;
 
 /**
- * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br />
+ * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br>
  * border-style: none | hidden | dotted | dashed | solid | double
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 5:21:51 PM
  */
 public class BorderApplier implements CssApplier {
@@ -50,7 +50,6 @@ public class BorderApplier implements CssApplier {
 	/**
 	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	Map<String, String> mapRtn = new HashMap<String, String>();
     	for (String pos : new String[] {null, TOP, RIGHT, BOTTOM, LEFT}) {
@@ -79,7 +78,6 @@ public class BorderApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	for (String pos : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
     		String posName = StringUtils.capitalize(pos.toLowerCase());

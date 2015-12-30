@@ -1,22 +1,22 @@
 package me.chyxion.xls.css;
 
-import java.awt.Color;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
+import java.awt.Color;
+import org.slf4j.Logger;
+import java.util.HashMap;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import org.slf4j.LoggerFactory;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 4:29:26 PM
  */
 public class CssUtils {
@@ -55,13 +55,18 @@ public class CssUtils {
 
 	/**
 	 * get color name
-	 * @param color
-	 * @return
+	 * @param color HSSFColor
+	 * @return color name
 	 */
     private static String colorName(Class<? extends HSSFColor> color) {
 	    return color.getSimpleName().replace("_", "").toLowerCase();
     }
-    
+   
+    /**
+     * get int value of string
+     * @param strValue string value
+     * @return int value
+     */
     public static int getInt(String strValue) {
     	int value = 0;
     	if (StringUtils.isNotBlank(strValue)) {
@@ -72,11 +77,21 @@ public class CssUtils {
     	}
     	return value;
     }
-    
+   
+    /**
+     * check number string 
+     * @param strValue string
+     * @return true if string is number
+     */
     public static boolean isNum(String strValue) {
     	return StringUtils.isNotBlank(strValue) && strValue.matches("^\\d+(\\w+|%)?$");
     }
-    
+   
+    /**
+     * process color
+     * @param color color to process
+     * @return color after process
+     */
     public static String processColor(String color) {
     	log.info("Process Color [{}].", color);
     	String colorRtn = null;
@@ -120,6 +135,12 @@ public class CssUtils {
     	return colorRtn;
     }
 
+    /**
+     * parse color
+     * @param workBook work book
+     * @param color string color
+     * @return HSSFColor 
+     */
     public static HSSFColor parseColor(HSSFWorkbook workBook, String color) {
     	HSSFColor poiColor = null;
     	if (StringUtils.isNotBlank(color)) {

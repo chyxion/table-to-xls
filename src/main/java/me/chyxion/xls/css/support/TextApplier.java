@@ -19,20 +19,20 @@ import me.chyxion.xls.css.CssApplier;
 import me.chyxion.xls.css.CssUtils;
 
 /**
- * supports: <br />
- * color: name | #rgb | #rrggbb | rgb(r, g, b) <br />
+ * supports: <br>
+ * color: name | #rgb | #rrggbb | rgb(r, g, b) <br>
  * text-decoration: underline; <br />
  * font-style: italic | oblique; <br />
- * font-weight:  bold | bolder | 700 | 800 | 900; <br />
+ * font-weight:  bold | bolder | 700 | 800 | 900; <br>
  * font-size: length; length unit will be ignored, 
- * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br />
+ * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br>
  * font：[[ font-style || font-variant || font-weight ]? font-size [/line-height]? font-family] 
  * | caption | icon | menu | message-box | small-caption | status-bar;
  * [font-variant, line-height, caption, icon, menu, message-box, small-caption, status-bar] will be ignored.
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 5:21:30 PM
  */
 public class TextApplier implements CssApplier {
@@ -45,7 +45,6 @@ public class TextApplier implements CssApplier {
 	/**
 	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	log.debug("Parse Font Style.");
     	Map<String, String> mapRtn = new HashMap<String, String>();
@@ -67,7 +66,6 @@ public class TextApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
     	HSSFFont font = null;
