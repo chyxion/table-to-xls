@@ -8,7 +8,15 @@
     <artifactId>table-to-xls</artifactId>
     <version>0.0.1-RELEASE</version>
     <name>Table To XLS</name>
-    <description>Table To XLS</description>
+    <description>Convert HTML Table To Excel</description>
+    <url>https://github.com/chyxion/table-to-xls</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License (MIT)</name>
+            <url>http://mit-license.org</url>
+        </license>
+    </licenses>
 
 	<developers>
 		<developer>
@@ -16,6 +24,7 @@
 			<name>Shaun Chyxion</name>
 			<email>chyxion@163.com</email>
 			<url>http://chyxion.github.io</url>
+            <timezone>+8</timezone>
 		</developer>
 	</developers>
 
@@ -55,7 +64,7 @@
 		<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>1.7.13</version>
         </dependency>
         <!-- Test -->
         <dependency>

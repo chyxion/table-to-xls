@@ -21,8 +21,8 @@ import me.chyxion.xls.css.CssUtils;
 /**
  * supports: <br>
  * color: name | #rgb | #rrggbb | rgb(r, g, b) <br>
- * text-decoration: underline; <br />
- * font-style: italic | oblique; <br />
+ * text-decoration: underline; <br>
+ * font-style: italic | oblique; <br>
  * font-weight:  bold | bolder | 700 | 800 | 900; <br>
  * font-size: length; length unit will be ignored, 
  * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br>

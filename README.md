@@ -7,14 +7,7 @@ Result
 ![XLS Result](http://git.oschina.net/chyxion/table-to-xls/raw/master/xls.png)
 
 ## Usage
-### Add Maven Repository
-```xml
-    <repository>
-    	<id>chyxion-github</id>
-    	<name>Chyxion Github</name>
-    	<url>http://chyxion.github.io/maven/</url>
-    </repository>
-```
+
 ### Add Maven Dependency
 ```xml
     <dependency>
@@ -26,17 +19,16 @@ Result
 ### Use In Code
 ```java
     StringBuilder html = new StringBuilder();
-    Scanner s = new Scanner(
-    	getClass().getResourceAsStream("/sample.html"), "utf-8");
+    Scanner s = new Scanner(getClass().getResourceAsStream("/sample.html"), "utf-8");
     while (s.hasNext()) {
-    	html.append(s.nextLine());
+        html.append(s.nextLine());
     }
     s.close();
-    FileOutputStream fout = new FileOutputStream("data.xls");
-    fout.write(TableToXls.process(html));
+    FileOutputStream fout = new FileOutputStream("target/data.xls");
+    TableToXls.process(html, fout);
     fout.close();
 ```
 
-## Contacts
+## Contact
 
 chyxion@163.com
