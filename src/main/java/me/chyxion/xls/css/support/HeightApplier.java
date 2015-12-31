@@ -1,14 +1,13 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
-
+import java.util.HashMap;
+import me.chyxion.xls.css.CssUtils;
+import me.chyxion.xls.css.CssApplier;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
 
-import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.CssUtils;
 
 /**
  * @version 0.0.1

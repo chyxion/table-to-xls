@@ -1,18 +1,18 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import java.util.HashMap;
+import org.slf4j.LoggerFactory;
+import me.chyxion.xls.css.CssUtils;
+import me.chyxion.xls.css.CssApplier;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.CssUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 /**
  * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br>
