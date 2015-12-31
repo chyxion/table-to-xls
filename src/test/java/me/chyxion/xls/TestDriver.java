@@ -1,14 +1,14 @@
 package me.chyxion.xls;
 
-import java.io.FileOutputStream;
-import java.util.Scanner;
 import org.junit.Test;
+import java.util.Scanner;
+import java.io.FileOutputStream;
 
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 2:07:51 PM
  */
 public class TestDriver {
@@ -21,8 +21,8 @@ public class TestDriver {
 			html.append(s.nextLine());
 		}
 		s.close();
-		FileOutputStream fout = new FileOutputStream("data.xls");
-		fout.write(TableToXls.process(html));
+		FileOutputStream fout = new FileOutputStream("target/data.xls");
+		TableToXls.process(html, fout);
 		fout.close();
 	}
 }

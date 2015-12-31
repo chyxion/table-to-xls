@@ -1,26 +1,25 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import me.chyxion.xls.css.CssApplier;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.usermodel.CellStyle;
-import me.chyxion.xls.css.CssApplier;
 
 /**
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 2:29:17 PM
  */
 public class AlignApplier implements CssApplier {
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	Map<String, String> mapRtn = new HashMap<String, String>();
     	String align = style.get(TEXT_ALIGN);
@@ -36,10 +35,9 @@ public class AlignApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
             Map<String, String> style) {
     	// text align

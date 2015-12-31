@@ -1,26 +1,26 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import java.util.HashMap;
+import org.slf4j.LoggerFactory;
+import me.chyxion.xls.css.CssUtils;
+import me.chyxion.xls.css.CssApplier;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.CssUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 /**
- * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br />
+ * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br>
  * border-style: none | hidden | dotted | dashed | solid | double
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 5:21:51 PM
  */
 public class BorderApplier implements CssApplier {
@@ -47,10 +47,9 @@ public class BorderApplier implements CssApplier {
          DOUBLE
 	};
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	Map<String, String> mapRtn = new HashMap<String, String>();
     	for (String pos : new String[] {null, TOP, RIGHT, BOTTOM, LEFT}) {
@@ -76,10 +75,9 @@ public class BorderApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	for (String pos : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
     		String posName = StringUtils.capitalize(pos.toLowerCase());
@@ -143,7 +141,10 @@ public class BorderApplier implements CssApplier {
     		}
     	}
     }
-    
+
+    // --
+    // private methods
+
     private void setBorderAttr(Map<String, String> mapBorder, String pos, String value) {
     	if (StringUtils.isNotBlank(value)) {
     		String borderColor = null;

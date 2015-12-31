@@ -1,50 +1,50 @@
 package me.chyxion.xls.css.support;
 
-import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.LoggerFactory;
+import me.chyxion.xls.css.CssUtils;
+import me.chyxion.xls.css.CssApplier;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.hssf.util.HSSFColor.BLACK;
-import org.apache.poi.ss.usermodel.Font;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import me.chyxion.xls.css.CssApplier;
-import me.chyxion.xls.css.CssUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 
 /**
- * supports: <br />
- * color: name | #rgb | #rrggbb | rgb(r, g, b) <br />
- * text-decoration: underline; <br />
- * font-style: italic | oblique; <br />
- * font-weight:  bold | bolder | 700 | 800 | 900; <br />
+ * supports: <br>
+ * color: name | #rgb | #rrggbb | rgb(r, g, b) <br>
+ * text-decoration: underline; <br>
+ * font-style: italic | oblique; <br>
+ * font-weight:  bold | bolder | 700 | 800 | 900; <br>
  * font-size: length; length unit will be ignored, 
- * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br />
+ * 	[xx-small|x-small|small|medium|large|x-large|xx-large] will be ignored. <br>
  * font：[[ font-style || font-variant || font-weight ]? font-size [/line-height]? font-family] 
  * | caption | icon | menu | message-box | small-caption | status-bar;
  * [font-variant, line-height, caption, icon, menu, message-box, small-caption, status-bar] will be ignored.
  * @version 0.0.1
  * @since 0.0.1
- * @author Shaun Chyxion <br />
- * chyxion@163.com <br />
+ * @author Shaun Chyxion <br>
+ * chyxion@163.com <br>
  * Oct 24, 2014 5:21:30 PM
  */
 public class TextApplier implements CssApplier {
-	private static final Logger log = LoggerFactory.getLogger(TextApplier.class);
+	private static final Logger log = 
+		LoggerFactory.getLogger(TextApplier.class);
 
 	private static final String TEXT_DECORATION = "text-decoration";
 	private static final String UNDERLINE = "underline"; 
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#parse(java.util.Map)
+	/**
+	 * {@inheritDoc}
 	 */
-    @Override
     public Map<String, String> parse(Map<String, String> style) {
     	log.debug("Parse Font Style.");
     	Map<String, String> mapRtn = new HashMap<String, String>();
@@ -63,10 +63,9 @@ public class TextApplier implements CssApplier {
 	    return mapRtn;
     }
 
-	/* (non-Javadoc)
-	 * @see me.chyxion.xls.css.CssApplier#apply(org.apache.poi.hssf.usermodel.HSSFCell, org.apache.poi.hssf.usermodel.HSSFCellStyle, java.util.Map)
-	 */
-    @Override
+    /**
+     * {@inheritDoc}
+     */
     public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
     	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
     	HSSFFont font = null;
@@ -110,6 +109,9 @@ public class TextApplier implements CssApplier {
     		cellStyle.setFont(font);
     	}
     }
+
+    // --
+    // private methods
 
     private Map<String, String> parseFontAttr(Map<String, String> style, Map<String, String> mapRtn) {
     	// font
