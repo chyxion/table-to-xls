@@ -1,10 +1,10 @@
 #Table To Xls
 ## Preview
-![HTML Table](http://git.oschina.net/chyxion/table-to-xls/raw/master/html.png)
+![HTML Table](/doc/html.png)
 
 Result
 
-![XLS Result](http://git.oschina.net/chyxion/table-to-xls/raw/master/xls.png)
+![XLS Result](/doc/xls.png)
 
 ## Usage
 
@@ -16,6 +16,7 @@ Result
         <version>0.0.1-RELEASE</version>
     </dependency>
 ```
+
 ### Use In Code
 ```java
     StringBuilder html = new StringBuilder();
