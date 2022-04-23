@@ -10,24 +10,17 @@ Result
 
 ### Add Maven Dependency
 ```xml
-    <dependency>
-        <groupId>me.chyxion</groupId>
-        <artifactId>table-to-xls</artifactId>
-        <version>0.0.1-RELEASE</version>
-    </dependency>
+<dependency>
+    <groupId>me.chyxion</groupId>
+    <artifactId>table-to-xls</artifactId>
+    <version>0.0.1-RELEASE</version>
+</dependency>
 ```
 
 ### Use In Code
 ```java
-    StringBuilder html = new StringBuilder();
-    Scanner s = new Scanner(getClass().getResourceAsStream("/sample.html"), "utf-8");
-    while (s.hasNext()) {
-        html.append(s.nextLine());
-    }
-    s.close();
-    FileOutputStream fout = new FileOutputStream("target/data.xls");
-    TableToXls.process(html, fout);
-    fout.close();
+TableToXls.process(getClass().getResourceAsStream("/sample.html"),
+    StandardCharsets.UTF_8, "", new FileOutputStream("target/data.xlsx"));
 ```
 
 ## Contact
