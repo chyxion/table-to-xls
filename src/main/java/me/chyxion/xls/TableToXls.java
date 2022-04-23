@@ -1,40 +1,39 @@
 package me.chyxion.xls;
 
+import lombok.val;
 import java.util.Map;
 import java.util.List;
+
+import org.apache.poi.xssf.usermodel.*;
 import org.jsoup.Jsoup;
 import java.util.Arrays;
 import org.slf4j.Logger;
 import java.util.HashMap;
+import lombok.SneakyThrows;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.io.OutputStream;
 import org.slf4j.LoggerFactory;
 import org.jsoup.nodes.Element;
-import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 import me.chyxion.xls.css.CssApplier;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFCell;
 import me.chyxion.xls.css.support.TextApplier;
 import me.chyxion.xls.css.support.WidthApplier;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import me.chyxion.xls.css.support.AlignApplier;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import me.chyxion.xls.css.support.BorderApplier;
 import me.chyxion.xls.css.support.HeightApplier;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import me.chyxion.xls.css.support.BackgroundApplier;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 2:09:02 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 2:09:02 PM
  */
 public class TableToXls {
 	private static final Logger log = 
@@ -50,21 +49,22 @@ public class TableToXls {
 		STYLE_APPLIERS.add(new BorderApplier());
 		STYLE_APPLIERS.add(new TextApplier());
 	}
-	private HSSFWorkbook workBook = new HSSFWorkbook();
-	private HSSFSheet sheet;
-	private Map<String, Object> cellsOccupied = new HashMap<String, Object>();
-	private Map<String, HSSFCellStyle> cellStyles = new HashMap<String, HSSFCellStyle>();
-	private HSSFCellStyle defaultCellStyle;
+	private XSSFWorkbook workBook = new XSSFWorkbook();
+	private XSSFSheet sheet;
+	private Map<String, Object> cellsOccupied = new HashMap<>(64);
+	private Map<String, XSSFCellStyle> cellStyles = new HashMap<>(64);
+	private XSSFCellStyle defaultCellStyle;
 	private int maxRow = 0;
 	// init
 	{
 		sheet = workBook.createSheet();
 		defaultCellStyle = workBook.createCellStyle();
 		defaultCellStyle.setWrapText(true);
-		defaultCellStyle.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
+		defaultCellStyle.setAlignment(HorizontalAlignment.CENTER);
+		defaultCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 		// border
-		short black = new HSSFColor.BLACK().getIndex();
-		short thin = CellStyle.BORDER_THIN;
+		val black = HSSFColor.HSSFColorPredefined.BLACK.getIndex();
+		val thin = BorderStyle.THIN;
 		// top
 		defaultCellStyle.setBorderTop(thin);
 		defaultCellStyle.setTopBorderColor(black);
@@ -80,73 +80,56 @@ public class TableToXls {
 	}
 
 	/**
-	 * process html to xls
-	 * @param html html char sequence 
-	 * @return xls bytes
-	 */
-	public static byte[] process(CharSequence html) {
-		ByteArrayOutputStream baos = null;
-		try {
-			baos = new ByteArrayOutputStream();
-			process(html, baos);
-			return baos.toByteArray();
-		}
-		finally {
-			if (baos != null) {
-				try {
-					baos.close();
-				}
-				catch (IOException e) {
-					log.warn("Close Byte Array Inpout Stream Error Caused.", e);
-				}
-			}
-		}
-	}
-
-	/**
-	 * process html to output stream
-	 * @param html html char sequence 
+	 * @param inputStream html input stream
+     *
+	 * @param charset charset
+	 * @param baseUrl html base url
 	 * @param output output stream
 	 */
-	public static void process(CharSequence html, OutputStream output) {
-		new TableToXls().doProcess(
-			html instanceof String ? (String) html : html.toString(), output);
+	@SneakyThrows
+	public static void process(
+			final InputStream inputStream,
+			final Charset charset,
+			final String baseUrl,
+			final OutputStream output) {
+		new TableToXls().doProcess(inputStream, charset, baseUrl, output);
 	}
 
 	// --
 	// private methods
 
-	private void processTable(Element table) {
+	private void processTable(final Element table) {
 		int rowIndex = 0;
 		if (maxRow > 0) {
 			// blank row
 			maxRow += 2;
 			rowIndex = maxRow;
 		}
-		log.info("Interate Table Rows.");
-		for (Element row : table.select("tr")) {
-			log.info("Parse Table Row [{}]. Row Index [{}].", row, rowIndex);
+
+		log.info("Iterate table rows.");
+		for (val row : table.select("tr")) {
+			log.info("Parse table row [{}]. row index [{}].", row, rowIndex);
 			int colIndex = 0;
-			log.info("Interate Cols.");
-			for (Element td : row.select("td, th")) {
+			for (val td : row.select("td, th")) {
 				// skip occupied cell
 				while (cellsOccupied.get(rowIndex + "_" + colIndex) != null) {
-					log.info("Cell [{}][{}] Has Been Occupied, Skip.", rowIndex, colIndex);
+					log.info("Cell [{}][{}] has been occupied, skip.", rowIndex, colIndex);
 					++colIndex;
 				}
-				log.info("Parse Col [{}], Col Index [{}].", td, colIndex);
+				log.info("Parse col [{}], col index [{}].", td, colIndex);
 				int rowSpan = 0;
-				String strRowSpan = td.attr("rowspan");
+				val strRowSpan = td.attr("rowspan");
 				if (StringUtils.isNotBlank(strRowSpan) && 
 						StringUtils.isNumeric(strRowSpan)) {
-					log.info("Found Row Span [{}].", strRowSpan);
+					log.info("Found row span [{}].", strRowSpan);
 					rowSpan = Integer.parseInt(strRowSpan);
 				}
+
 				int colSpan = 0;
-				String strColSpan = td.attr("colspan");
+				val strColSpan = td.attr("colspan");
 				if (StringUtils.isNotBlank(strColSpan) && 
 						StringUtils.isNumeric(strColSpan)) {
-					log.info("Found Col Span [{}].", strColSpan);
+					log.info("Found col span [{}].", strColSpan);
 					colSpan = Integer.parseInt(strColSpan);
 				}
 				// col span & row span
@@ -174,23 +157,21 @@ public class TableToXls {
 		}
 	}
 
-	private void doProcess(String html, OutputStream output) {
-		for (Element table : Jsoup.parseBodyFragment(html).select("table")) {
+	private void doProcess(final InputStream inputStream,
+						   final Charset charset,
+						   final String baseUrl,
+						   final OutputStream output) throws IOException {
+		for (val table : Jsoup.parse(inputStream, charset.name(), baseUrl).select("table")) {
 	        processTable(table);
         }
-		try {
-			workBook.write(output);
-		}
-		catch (IOException e) {
-			throw new IllegalStateException("Table To XLS, IO ERROR.", e);
-		}
+		workBook.write(output);
 	}
 
     private void spanRow(Element td, int rowIndex, int colIndex, int rowSpan) {
-    	log.info("Span Row , From Row [{}], Span [{}].", rowIndex, rowSpan);
+    	log.info("Span row , from row [{}], span [{}].", rowIndex, rowSpan);
     	mergeRegion(rowIndex, rowIndex + rowSpan - 1, colIndex, colIndex);
     	for (int i = 0; i < rowSpan; ++i) {
-    		HSSFRow row = getOrCreateRow(rowIndex + i);
+			val row = getOrCreateRow(rowIndex + i);
     		createCell(td, row, colIndex);
     		cellsOccupied.put((rowIndex + i) + "_" + colIndex, true);
     	}
@@ -198,9 +179,9 @@ public class TableToXls {
     }
 
     private void spanCol(Element td, int rowIndex, int colIndex, int colSpan) {
-    	log.info("Span Col, From Col [{}], Span [{}].", colIndex, colSpan);
+    	log.info("Span col, from col [{}], span [{}].", colIndex, colSpan);
     	mergeRegion(rowIndex, rowIndex, colIndex, colIndex + colSpan - 1);
-    	HSSFRow row = getOrCreateRow(rowIndex);
+    	val row = getOrCreateRow(rowIndex);
     	for (int i = 0; i < colSpan; ++i) {
     		createCell(td, row, colIndex + i);
     	}
@@ -209,11 +190,11 @@ public class TableToXls {
 
     private void spanRowAndCol(Element td, int rowIndex, int colIndex,
             int rowSpan, int colSpan) {
-    	log.info("Span Row And Col, From Row [{}], Span [{}].", rowIndex, rowSpan);
-    	log.info("From Col [{}], Span [{}].", colIndex, colSpan);
+    	log.info("Span row and col, from row [{}], span [{}].", rowIndex, rowSpan);
+    	log.info("From col [{}], span [{}].", colIndex, colSpan);
     	mergeRegion(rowIndex, rowIndex + rowSpan - 1, colIndex, colIndex + colSpan - 1);
     	for (int i = 0; i < rowSpan; ++i) {
-    		HSSFRow row = getOrCreateRow(rowIndex + i);
+			val row = getOrCreateRow(rowIndex + i);
     		for (int j = 0; j < colSpan; ++j) {
     			createCell(td, row, colIndex + j);
     			cellsOccupied.put((rowIndex + i) + "_" + (colIndex + j), true);
@@ -222,22 +203,22 @@ public class TableToXls {
     	getOrCreateRow(rowIndex).getCell(colIndex).setCellValue(td.text());
     }
 
-    private HSSFCell createCell(Element td, HSSFRow row, int colIndex) {
-    	HSSFCell cell = row.getCell(colIndex);
+    private XSSFCell createCell(final Element td, final XSSFRow row, final int colIndex) {
+		XSSFCell cell = row.getCell(colIndex);
     	if (cell == null) {
-    		log.debug("Create Cell [{}][{}].", row.getRowNum(), colIndex);
+    		log.debug("Create cell [{}][{}].", row.getRowNum(), colIndex);
     		cell = row.createCell(colIndex);
     	}
     	return applyStyle(td, cell);
     }
 
-    private HSSFCell applyStyle(Element td, HSSFCell cell) {
-    	String style = td.attr(CssApplier.STYLE);
-    	HSSFCellStyle cellStyle = null;
+    private XSSFCell applyStyle(final Element td, final XSSFCell cell) {
+    	val style = td.attr(CssApplier.STYLE);
+    	XSSFCellStyle cellStyle = null;
     	if (StringUtils.isNotBlank(style)) {
     		if (cellStyles.size() < 4000) {
-				Map<String, String> mapStyle = parseStyle(style.trim());
-				Map<String, String> mapStyleParsed = new HashMap<String, String>();
+				val mapStyle = parseStyle(style.trim());
+				val mapStyleParsed = new HashMap<String, String>();
 				for (CssApplier applier : STYLE_APPLIERS) {
 					mapStyleParsed.putAll(applier.parse(mapStyle));
 				}
@@ -246,7 +227,7 @@ public class TableToXls {
 					log.debug("No Cell Style Found In Cache, Parse New Style.");
 					cellStyle = workBook.createCellStyle();
 					cellStyle.cloneStyleFrom(defaultCellStyle);
-					for (CssApplier applier : STYLE_APPLIERS) {
+					for (val applier : STYLE_APPLIERS) {
 						applier.apply(cell, cellStyle, mapStyleParsed);
 					}
 					// cache style
@@ -254,12 +235,12 @@ public class TableToXls {
 				}
     		}
     		else {
-    			log.info("Custom Cell Style Exceeds 4000, Could Not Create New Style, Use Default Style.");
+    			log.info("Custom cell style exceeds 4000, could not create new style, use default style.");
     			cellStyle = defaultCellStyle;
     		}
     	}
     	else {
-    		log.debug("Use Default Cell Style.");
+    		log.debug("Use default cell style.");
     		cellStyle = defaultCellStyle;
     	}
     	cell.setCellStyle(cellStyle);
@@ -267,30 +248,31 @@ public class TableToXls {
     }
 
     private String styleStr(Map<String, String> style) {
-    	log.debug("Build Style String, Style [{}].", style);
-    	StringBuilder sbStyle = new StringBuilder();
-    	Object[] keys = style.keySet().toArray();
+    	log.debug("Build style string, style [{}].", style);
+    	val sbStyle = new StringBuilder();
+    	val keys = style.keySet().toArray();
     	Arrays.sort(keys);
-    	for (Object key : keys) {
+    	for (val key : keys) {
     		sbStyle.append(key)
     		.append(':')
     		.append(style.get(key))
     		.append(';');
         }
-    	log.debug("Style String Result [{}].", sbStyle);
+    	log.debug("Style string result [{}].", sbStyle);
     	return sbStyle.toString();
     }
 
     private Map<String, String> parseStyle(String style) {
-    	log.debug("Parse Style String [{}] To Map.", style);
-    	Map<String, String> mapStyle = new HashMap<String, String>();
-    	for (String s : style.split("\\s*;\\s*")) {
+    	log.debug("Parse style string [{}] to map.", style);
+    	val mapStyle = new HashMap<String, String>();
+
+    	for (val s : style.split("\\s*;\\s*")) {
     		if (StringUtils.isNotBlank(s)) {
-    			String[] ss = s.split("\\s*\\:\\s*");
+    			val ss = s.split("\\s*\\:\\s*");
     			if (ss.length == 2 &&
     					StringUtils.isNotBlank(ss[0]) &&
     					StringUtils.isNotBlank(ss[1])) {
-    				String attrName = ss[0].toLowerCase();
+    				val attrName = ss[0].toLowerCase();
     				String attrValue = ss[1];
     				// do not change font name
     				if (!CssApplier.FONT.equals(attrName) && 
@@ -301,14 +283,14 @@ public class TableToXls {
     			}
     		}
     	}
-    	log.debug("Style Map Result [{}].", mapStyle);
+    	log.debug("Style map result [{}].", mapStyle);
 	    return mapStyle;
     }
 
-    private HSSFRow getOrCreateRow(int rowIndex) {
-    	HSSFRow row = sheet.getRow(rowIndex);
+    private XSSFRow getOrCreateRow(int rowIndex) {
+		XSSFRow row = sheet.getRow(rowIndex);
     	if (row == null) {
-    		log.info("Create New Row [{}].", rowIndex);
+    		log.info("create new row [{}].", rowIndex);
     		row = sheet.createRow(rowIndex);
     		if (rowIndex > maxRow) {
     			maxRow = rowIndex;
@@ -318,8 +300,8 @@ public class TableToXls {
     }
 
     private void mergeRegion(int firstRow, int lastRow, int firstCol, int lastCol) {
-    	log.debug("Merge Region, From Row [{}], To [{}].", firstRow, lastRow);
-    	log.debug("From Col [{}], To [{}].", firstCol, lastCol);
+    	log.debug("merge region, from row [{}], to [{}].", firstRow, lastRow);
+    	log.debug("from col [{}], to [{}].", firstCol, lastCol);
     	sheet.addMergedRegion(new CellRangeAddress(firstRow, lastRow, firstCol, lastCol));
     }
 }

@@ -1,15 +1,12 @@
 package me.chyxion.xls.css;
 
 import java.util.Map;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 2:10:28 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 2:10:28 PM
  */
 public interface CssApplier {
 	// constants
@@ -20,6 +17,11 @@ public interface CssApplier {
 	String RIGHT = "right";
 	String BOTTOM = "bottom";
 	String LEFT = "left";
+
+	String[] ALL_SIDES = {
+		TOP, RIGHT, BOTTOM, LEFT
+	};
+
 	String WIDTH = "width";
 	String HEIGHT = "height";
 	String COLOR = "color";
@@ -54,5 +56,5 @@ public interface CssApplier {
 	 * @param cellStyle cell style
 	 * @param style style
 	 */
-	void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style);
+	void apply(XSSFCell cell, XSSFCellStyle cellStyle, Map<String, String> style);
 }

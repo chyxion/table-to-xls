@@ -1,26 +1,22 @@
 package me.chyxion.xls.css;
 
+import lombok.val;
 import java.util.Map;
-import java.awt.Color;
-import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFPalette;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.ss.usermodel.ExtendedColor;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 4:29:26 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 4:29:26 PM
  */
+@Slf4j
 public class CssUtils {
-	private static final Logger log = LoggerFactory.getLogger(CssUtils.class);
 	// matches #rgb
 	private static final String COLOR_PATTERN_VALUE_SHORT = 
 			"^(#(?:[a-f]|\\d){3})$";
@@ -31,26 +27,28 @@ public class CssUtils {
 	private static final String COLOR_PATTERN_RGB = 
 			"^(rgb\\s*\\(\\s*(.+)\\s*,\\s*(.+)\\s*,\\s*(.+)\\s*\\))$";
 	// color name -> POI Color
-	private static Map<String, HSSFColor> colors = new HashMap<String, HSSFColor>();
+	private static Map<String, Color> colors = new HashMap<>();
+
 	// static init
 	static {
-		for (Map.Entry<Integer, HSSFColor> color : HSSFColor.getIndexHash().entrySet()) {
-			colors.put(colorName(color.getValue().getClass()), color.getValue());
+		for (val colorPredefined : HSSFColor.HSSFColorPredefined.values()) {
+			colors.put(colorName(colorPredefined.name()), convertHSSFColorToXSSFColor(colorPredefined.getColor()));
 		}
+
 		// light gray
-		HSSFColor color = colors.get(colorName(HSSFColor.GREY_25_PERCENT.class));
-		colors.put("lightgray", color);
-		colors.put("lightgrey", color);
+		val colorLightgray = convertHSSFColorToXSSFColor(HSSFColor.HSSFColorPredefined.GREY_25_PERCENT.getColor());
+		colors.put("lightgray", colorLightgray);
+		colors.put("lightgrey", colorLightgray);
 		// silver
-		colors.put("silver", colors.get(colorName(HSSFColor.GREY_40_PERCENT.class)));
+		colors.put("silver", convertHSSFColorToXSSFColor(HSSFColor.HSSFColorPredefined.GREY_40_PERCENT.getColor()));
 		// darkgray
-		color = colors.get(colorName(HSSFColor.GREY_50_PERCENT.class));
-		colors.put("darkgray", color);
-		colors.put("darkgrey", color);
+		val colorDarkgray = convertHSSFColorToXSSFColor(HSSFColor.HSSFColorPredefined.GREY_50_PERCENT.getColor());
+		colors.put("darkgray", colorDarkgray);
+		colors.put("darkgrey", colorDarkgray);
 		// gray
-		color = colors.get(colorName(HSSFColor.GREY_80_PERCENT.class));
-		colors.put("gray", color);
-		colors.put("grey", color);
+		val colorGray = convertHSSFColorToXSSFColor(HSSFColor.HSSFColorPredefined.GREY_80_PERCENT.getColor());
+		colors.put("gray", colorGray);
+		colors.put("grey", colorGray);
 	}
 
 	/**
@@ -58,8 +56,8 @@ public class CssUtils {
 	 * @param color HSSFColor
 	 * @return color name
 	 */
-    private static String colorName(Class<? extends HSSFColor> color) {
-	    return color.getSimpleName().replace("_", "").toLowerCase();
+    private static String colorName(final String color) {
+	    return color.replace("_", "").toLowerCase();
     }
    
     /**
@@ -67,15 +65,14 @@ public class CssUtils {
      * @param strValue string value
      * @return int value
      */
-    public static int getInt(String strValue) {
-    	int value = 0;
+    public static int getInt(final String strValue) {
     	if (StringUtils.isNotBlank(strValue)) {
-    		Matcher m = Pattern.compile("^(\\d+)(?:\\w+|%)?$").matcher(strValue);
+    		val m = Pattern.compile("^(\\d+)(?:\\w+|%)?$").matcher(strValue);
     		if (m.find()) {
-    			value = Integer.parseInt(m.group(1));
+    			return Integer.parseInt(m.group(1));
     		}
     	}
-    	return value;
+    	return 0;
     }
    
     /**
@@ -83,7 +80,7 @@ public class CssUtils {
      * @param strValue string
      * @return true if string is number
      */
-    public static boolean isNum(String strValue) {
+    public static boolean isNum(final String strValue) {
     	return StringUtils.isNotBlank(strValue) && strValue.matches("^\\d+(\\w+|%)?$");
     }
    
@@ -92,97 +89,125 @@ public class CssUtils {
      * @param color color to process
      * @return color after process
      */
-    public static String processColor(String color) {
-    	log.info("Process Color [{}].", color);
-    	String colorRtn = null;
-    	if (StringUtils.isNotBlank(color)) {
-    		HSSFColor poiColor = null;
-    		// #rgb -> #rrggbb
-    		if (color.matches(COLOR_PATTERN_VALUE_SHORT)) {
-    			log.debug("Short Hex Color [{}] Found.", color);
-    			StringBuffer sbColor = new StringBuffer();
-    			Matcher m = Pattern.compile("([a-f]|\\d)").matcher(color);
-    			while (m.find()) {
-    				m.appendReplacement(sbColor, "$1$1");
-    			}
-    			colorRtn = sbColor.toString();
-    			log.debug("Translate Short Hex Color [{}] To [{}].", color, colorRtn);
-    		}
-    		// #rrggbb
-    		else if (color.matches(COLOR_PATTERN_VALUE_LONG)) {
-    			colorRtn = color;
-    			log.debug("Hex Color [{}] Found, Return.", color);
-    		}
-    		// rgb(r, g, b)
-    		else if (color.matches(COLOR_PATTERN_RGB)) {
-    			Matcher m = Pattern.compile(COLOR_PATTERN_RGB).matcher(color);
-    			if (m.matches()) {
-    				log.debug("RGB Color [{}] Found.", color);
-    				colorRtn = convertColor(calcColorValue(m.group(2)),
-    							calcColorValue(m.group(3)),
-    							calcColorValue(m.group(4)));
-    				log.debug("Translate RGB Color [{}] To Hex [{}].", color, colorRtn);
-    			}
-    		}
-    		// color name, red, green, ...
-    		else if ((poiColor = getColor(color)) != null) {
-    			log.debug("Color Name [{}] Found.", color);
-    			short[] t = poiColor.getTriplet();
-    			colorRtn = convertColor(t[0], t[1], t[2]);
-    			log.debug("Translate Color Name [{}] To Hex [{}].", color, colorRtn);
-    		}
-    	}
-    	return colorRtn;
+    public static String processColor(final String color) {
+    	log.info("Process color [{}].", color);
+
+    	if (StringUtils.isBlank(color)) {
+    		return null;
+		}
+
+		// #rgb -> #rrggbb
+		if (color.matches(COLOR_PATTERN_VALUE_SHORT)) {
+			log.debug("Short Hex color [{}] found.", color);
+			val sbColor = new StringBuffer();
+			val m = Pattern.compile("([a-f]|\\d)").matcher(color);
+			while (m.find()) {
+				m.appendReplacement(sbColor, "$1$1");
+			}
+			val colorRtn = sbColor.toString();
+			log.debug("Translate short HEX color [{}] to [{}].", color, colorRtn);
+			return colorRtn;
+		}
+
+		// #rrggbb
+		if (color.matches(COLOR_PATTERN_VALUE_LONG)) {
+			log.debug("Hex color [{}] found, return.", color);
+			return color;
+		}
+
+		// rgb(r, g, b)
+		if (color.matches(COLOR_PATTERN_RGB)) {
+			val m = Pattern.compile(COLOR_PATTERN_RGB).matcher(color);
+			if (m.matches()) {
+				log.debug("RGB color [{}] found.", color);
+				val colorRtn = convertColor(calcColorValue(m.group(2)),
+							calcColorValue(m.group(3)),
+							calcColorValue(m.group(4)));
+				log.debug("Translate RGB color [{}] to HEX [{}].", color, colorRtn);
+				return colorRtn;
+			}
+		}
+
+		val poiColor = getColor(color);
+		// color name, red, green, ...
+		if (poiColor != null) {
+			log.debug("Color name [{}] found.", color);
+
+			val rgb = convertToIntArray(((ExtendedColor) poiColor).getRGB());
+			val colorRtn = convertColor(rgb[0], rgb[1], rgb[2]);
+			log.debug("Translate color name [{}] to HEX [{}].", color, colorRtn);
+			return colorRtn;
+		}
+
+    	return null;
     }
 
     /**
      * parse color
-     * @param workBook work book
      * @param color string color
      * @return HSSFColor 
      */
-    public static HSSFColor parseColor(HSSFWorkbook workBook, String color) {
-    	HSSFColor poiColor = null;
+    public static XSSFColor parseColor(final String color) {
     	if (StringUtils.isNotBlank(color)) {
-    		Color awtColor = Color.decode(color);
+    		val awtColor = java.awt.Color.decode(color);
     		if (awtColor != null) {
-    			int r = awtColor.getRed();
-    			int g = awtColor.getGreen();
-    			int b = awtColor.getBlue();
-    			HSSFPalette palette = workBook.getCustomPalette();
-    			poiColor = palette.findColor((byte) r, (byte) g, (byte) b);
-    			if (poiColor == null) {
-    				poiColor = palette.findSimilarColor(r, g, b);
-    			}
+    			return new XSSFColor(new byte[]{(byte) awtColor.getRed(), (byte) awtColor.getGreen(), (byte) awtColor.getBlue()}, null);
     		}
     	}
-    	return poiColor;
+    	return null;
     }
+
+	/**
+	 * if color is black
+	 *
+	 * @param color color
+	 * @return true if color is black
+	 */
+	public static boolean isBlack(final XSSFColor color) {
+		for (val b : color.getRGB()) {
+			if (b != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
 
     // --
     // private methods
 
-    private static HSSFColor getColor(String color) {
+    private static Color getColor(String color) {
     	return colors.get(color.replace("_", ""));
     }
 
-    private static String convertColor(int r, int g, int b) {
+    private static String convertColor(final int r, final int g, final int b) {
     	return String.format("#%02x%02x%02x", r, g, b);
     }
 
-    private static int calcColorValue(String color) {
-    	int rtn = 0;
+    private static int calcColorValue(final String color) {
     	// matches 64 or 64%
-		Matcher m = Pattern.compile("^(\\d*\\.?\\d+)\\s*(%)?$").matcher(color);
+		val m = Pattern.compile("^(\\d*\\.?\\d+)\\s*(%)?$").matcher(color);
 		if (m.matches()) {
 			// % not found
 			if (m.group(2) == null) {
-				rtn = Math.round(Float.parseFloat(m.group(1))) % 256;
+				return Math.round(Float.parseFloat(m.group(1))) % 256;
 			}
-			else {
-				rtn = Math.round(Float.parseFloat(m.group(1)) * 255 / 100) % 256;
-			}
+			return Math.round(Float.parseFloat(m.group(1)) * 255 / 100) % 256;
 		}
-		return rtn;
+		return 0;
     }
+
+    static XSSFColor convertHSSFColorToXSSFColor(final HSSFColor color) {
+		val rgb = color.getTriplet();
+		return new XSSFColor(new byte[]{(byte) rgb[0], (byte) rgb[1], (byte) rgb[2]}, null);
+	}
+
+	static int[] convertToIntArray(byte[] input) {
+		val ret = new int[input.length];
+		int i = 0;
+		for (val b : input) {
+			// Range 0 to 255, not -128 to 127
+			ret[i++] = b & 0xff;
+		}
+		return ret;
+	}
 }

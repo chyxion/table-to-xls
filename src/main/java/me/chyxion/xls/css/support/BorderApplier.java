@@ -1,30 +1,29 @@
 package me.chyxion.xls.css.support;
 
+import lombok.val;
 import java.util.Map;
-import org.slf4j.Logger;
 import java.util.HashMap;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import me.chyxion.xls.css.CssUtils;
+import java.util.function.BiConsumer;
 import me.chyxion.xls.css.CssApplier;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.commons.lang3.reflect.MethodUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  * border[-[pos][-attr]]: [border-width] || [border-style] || [border-color]; <br>
  * border-style: none | hidden | dotted | dashed | solid | double
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 5:21:51 PM
+ *
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 5:21:51 PM
  */
+@Slf4j
 public class BorderApplier implements CssApplier {
-	private static final Logger log = LoggerFactory.getLogger(BorderApplier.class);
+
 	private static final String NONE = "none";
 	private static final String HIDDEN = "hidden";
 	private static final String SOLID = "solid";
@@ -47,11 +46,27 @@ public class BorderApplier implements CssApplier {
          DOUBLE
 	};
 
+	private static final Map<String, BiConsumer<XSSFCellStyle, XSSFColor>> CELL_BORDER_COLOR_SETTERS = new HashMap<>();
+	private static final Map<String, BiConsumer<XSSFCellStyle, BorderStyle>> CELL_BORDER_STYLE_SETTERS = new HashMap<>();
+
+	static {
+		CELL_BORDER_COLOR_SETTERS.put(TOP, XSSFCellStyle::setTopBorderColor);
+		CELL_BORDER_COLOR_SETTERS.put(RIGHT, XSSFCellStyle::setRightBorderColor);
+		CELL_BORDER_COLOR_SETTERS.put(BOTTOM, XSSFCellStyle::setBottomBorderColor);
+		CELL_BORDER_COLOR_SETTERS.put(LEFT, XSSFCellStyle::setLeftBorderColor);
+
+		CELL_BORDER_STYLE_SETTERS.put(TOP, XSSFCellStyle::setBorderTop);
+		CELL_BORDER_STYLE_SETTERS.put(RIGHT, XSSFCellStyle::setBorderRight);
+		CELL_BORDER_STYLE_SETTERS.put(BOTTOM, XSSFCellStyle::setBorderBottom);
+		CELL_BORDER_STYLE_SETTERS.put(LEFT, XSSFCellStyle::setBorderLeft);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
-    public Map<String, String> parse(Map<String, String> style) {
-    	Map<String, String> mapRtn = new HashMap<String, String>();
+	@Override
+    public Map<String, String> parse(final Map<String, String> style) {
+    	val mapRtn = new HashMap<String, String>();
     	for (String pos : new String[] {null, TOP, RIGHT, BOTTOM, LEFT}) {
     		// border[-attr]
     		if (pos == null) {
@@ -64,8 +79,8 @@ public class BorderApplier implements CssApplier {
     		else {
     			setBorderAttr(mapRtn, pos, style.get(BORDER + "-" + pos));
     			for (String attr : new String[] {COLOR, WIDTH, STYLE}) {
-    				String attrName = BORDER + "-" + pos + "-" + attr;
-    				String attrValue = style.get(attrName);
+    				val attrName = BORDER + "-" + pos + "-" + attr;
+    				val attrValue = style.get(attrName);
     				if (StringUtils.isNotBlank(attrValue)) {
     					mapRtn.put(attrName, attrValue);
     				}
@@ -78,74 +93,75 @@ public class BorderApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
-    	for (String pos : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
-    		String posName = StringUtils.capitalize(pos.toLowerCase());
+	@Override
+	public void apply(final XSSFCell cell,
+					  final XSSFCellStyle cellStyle,
+					  final Map<String, String> style) {
+
+    	for (val pos : ALL_SIDES) {
     		// color
-    		String colorAttr = BORDER + "-" + pos + "-" + COLOR;
-    		HSSFColor poiColor = CssUtils.parseColor(cell.getSheet().getWorkbook(), style.get(colorAttr));
+    		val colorAttr = BORDER + "-" + pos + "-" + COLOR;
+    		val poiColor = CssUtils.parseColor(style.get(colorAttr));
+
     		if (poiColor != null) {
-    			try {
-	                MethodUtils.invokeMethod(cellStyle, 
-	                		"set" + posName + "BorderColor", 
-	                		poiColor.getIndex());
-                }
-                catch (Exception e) {
-                	log.error("Set Border Color Error Caused.", e);
-                }
+				CELL_BORDER_COLOR_SETTERS.get(pos).accept(cellStyle, poiColor);
     		}
-    		// width
-    		int width = CssUtils.getInt(style.get(BORDER + "-" + pos + "-" + WIDTH));
-    		String styleAttr = BORDER + "-" + pos + "-" + STYLE;
-    		String styleValue = style.get(styleAttr);
-    		short shortValue = -1;
-    		// empty or solid
-    		if (StringUtils.isBlank(styleValue) || "solid".equals(styleValue)) {
-    			if (width > 2) {
-    				shortValue = CellStyle.BORDER_THICK;
-    			}
-    			else if (width > 1) {
-    				shortValue = CellStyle.BORDER_MEDIUM;
-    			}
-    			else {
-    				shortValue = CellStyle.BORDER_THIN;
-    			}
-    		}
-    		else if (ArrayUtils.contains(new String[] {NONE, HIDDEN}, styleValue)) {
-    			shortValue = CellStyle.BORDER_NONE;
-    		}
-    		else if (DOUBLE.equals(styleValue)) {
-    			shortValue = CellStyle.BORDER_DOUBLE;
-    		}
-    		else if (DOTTED.equals(styleValue)) {
-    			shortValue = CellStyle.BORDER_DOTTED;
-    		}
-    		else if (DASHED.equals(styleValue)) {
-    			if (width > 1) {
-    				shortValue = CellStyle.BORDER_MEDIUM_DASHED;
-    			}
-    			else {
-    				shortValue = CellStyle.BORDER_DASHED;
-    			}
-    		}
-    		// border style
-    		if (shortValue != -1) {
-    			try {
-	                MethodUtils.invokeMethod(cellStyle, 
-	                		"setBorder" + posName, 
-	                		shortValue);
-                }
-                catch (Exception e) {
-                	log.error("Set Border Style Error Caused.", e);
-                }
+
+			// border style
+			val borderStyle = getBorderStyle(pos, style);
+    		if (borderStyle != null) {
+				CELL_BORDER_STYLE_SETTERS.get(pos).accept(cellStyle, borderStyle);
     		}
     	}
     }
 
-    // --
+
+	// --
     // private methods
 
-    private void setBorderAttr(Map<String, String> mapBorder, String pos, String value) {
+	BorderStyle getBorderStyle(final String pos, final Map<String, String> style) {
+		// width
+		val width = CssUtils.getInt(style.get(BORDER + "-" + pos + "-" + WIDTH));
+		val styleAttr = BORDER + "-" + pos + "-" + STYLE;
+		val styleValue = style.get(styleAttr);
+
+		// empty or solid
+		if (StringUtils.isBlank(styleValue) || "solid".equals(styleValue)) {
+			if (width > 2) {
+				return BorderStyle.THICK;
+			}
+			if (width > 1) {
+				return BorderStyle.MEDIUM;
+			}
+			return BorderStyle.THIN;
+		}
+
+		if (ArrayUtils.contains(new String[] {NONE, HIDDEN}, styleValue)) {
+			return BorderStyle.NONE;
+		}
+
+		if (DOUBLE.equals(styleValue)) {
+			return BorderStyle.DOUBLE;
+		}
+
+		if (DOTTED.equals(styleValue)) {
+			return BorderStyle.DOTTED;
+		}
+
+		if (DASHED.equals(styleValue)) {
+			if (width > 1) {
+				return BorderStyle.MEDIUM_DASHED;
+			}
+			return BorderStyle.DASHED;
+		}
+
+		return null;
+	}
+
+    private void setBorderAttr(final Map<String, String> mapBorder,
+							   final String pos,
+							   final String value) {
+
     	if (StringUtils.isNotBlank(value)) {
     		String borderColor = null;
     		for (String borderAttr : value.split("\\s+")) {
@@ -165,19 +181,22 @@ public class BorderApplier implements CssApplier {
     	}
     }
 
-    private void setBorderAttr(Map<String, String> mapBorder, String pos,
-            String attr, String value) {
+    private void setBorderAttr(final Map<String, String> mapBorder,
+							   final String pos,
+							   final String attr,
+							   final String value) {
+
     	if (StringUtils.isNotBlank(pos)) {
     		mapBorder.put(BORDER + "-" + pos + "-" + attr, value);
     	}
     	else {
-    		for (String name : new String[] {TOP, RIGHT, BOTTOM, LEFT}) {
-    			mapBorder.put(BORDER + "-" + name + "-" + attr, value);
+    		for (val side : ALL_SIDES) {
+    			mapBorder.put(BORDER + "-" + side + "-" + attr, value);
     		}
     	}
     }
     
-    private boolean isStyle(String value) {
+    private boolean isStyle(final String value) {
     	return ArrayUtils.contains(BORDER_STYLES, value);
     }
 }

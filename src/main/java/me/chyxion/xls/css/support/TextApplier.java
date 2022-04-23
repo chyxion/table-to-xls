@@ -1,22 +1,20 @@
 package me.chyxion.xls.css.support;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import java.util.Map;
 import org.slf4j.Logger;
 import java.util.HashMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
 import me.chyxion.xls.css.CssUtils;
 import me.chyxion.xls.css.CssApplier;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.util.HSSFColor.BLACK;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
  * supports: <br>
@@ -29,15 +27,12 @@ import org.apache.poi.hssf.usermodel.HSSFCellStyle;
  * font：[[ font-style || font-variant || font-weight ]? font-size [/line-height]? font-family] 
  * | caption | icon | menu | message-box | small-caption | status-bar;
  * [font-variant, line-height, caption, icon, menu, message-box, small-caption, status-bar] will be ignored.
- * @version 0.0.1
- * @since 0.0.1
+ *
  * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 5:21:30 PM
+ * @date Oct 24, 2014 5:21:30 PM
  */
+@Slf4j
 public class TextApplier implements CssApplier {
-	private static final Logger log = 
-		LoggerFactory.getLogger(TextApplier.class);
 
 	private static final String TEXT_DECORATION = "text-decoration";
 	private static final String UNDERLINE = "underline"; 
@@ -45,13 +40,14 @@ public class TextApplier implements CssApplier {
 	/**
 	 * {@inheritDoc}
 	 */
-    public Map<String, String> parse(Map<String, String> style) {
-    	log.debug("Parse Font Style.");
-    	Map<String, String> mapRtn = new HashMap<String, String>();
+	@Override
+    public Map<String, String> parse(final Map<String, String> style) {
+    	log.debug("Parse font style.");
+    	val mapRtn = new HashMap<String, String>(8);
     	// color
-    	String color = CssUtils.processColor(style.get(COLOR));
+    	val color = CssUtils.processColor(style.get(COLOR));
     	if (StringUtils.isNotBlank(color)) {
-    		log.debug("Text Color [{}] Found.", color);
+    		log.debug("Text color [{}] found.", color);
     		mapRtn.put(COLOR, color);
     	}
     	// font
@@ -66,42 +62,49 @@ public class TextApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
-    	HSSFWorkbook workBook = cell.getSheet().getWorkbook();
-    	HSSFFont font = null;
+	@Override
+	public void apply(final XSSFCell cell,
+					  final XSSFCellStyle cellStyle,
+					  final Map<String, String> style) {
+
+    	XSSFFont font = null;
     	if (ITALIC.equals(style.get(FONT_STYLE))) {
-    		font = getFont(cell, font);
+    		font = createFontIfNull(cell, font);
     		font.setItalic(true);
     	}
-    	int fontSize = CssUtils.getInt(style.get(FONT_SIZE));
+
+    	val fontSize = CssUtils.getInt(style.get(FONT_SIZE));
     	if (fontSize > 0) {
-    		font = getFont(cell, font);
+    		font = createFontIfNull(cell, font);
     		font.setFontHeightInPoints((short) fontSize);
     	}
     	if (BOLD.equals(style.get(FONT_WEIGHT))) {
-    		font = getFont(cell, font);
-    		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+    		font = createFontIfNull(cell, font);
+    		font.setBold(true);
     	}
-    	String fontFamily = style.get(FONT_FAMILY);
+
+    	val fontFamily = style.get(FONT_FAMILY);
     	if (StringUtils.isNotBlank(fontFamily)) {
-    		font = getFont(cell, font);
+    		font = createFontIfNull(cell, font);
     		font.setFontName(fontFamily);
     	}
-    	HSSFColor color = CssUtils.parseColor(workBook, style.get(COLOR));
+
+    	val color = CssUtils.parseColor(style.get(COLOR));
     	if (color != null) {
-    		if (color.getIndex() != BLACK.index) {
-    			font = getFont(cell, font);
-    			font.setColor(color.getIndex());
+    		if (!CssUtils.isBlack(color)) {
+    			font = createFontIfNull(cell, font);
+    			font.setColor(color);
     		}
     		else {
-    			log.info("Text Color [{}] Is Black Or Fimiliar To Black, Ignore.", 
-    					style.remove(COLOR));
+				val removedColor = style.remove(COLOR);
+				log.info("Text color [{}] is black or familiar to black, ignore.", removedColor);
     		}
     	}
+
     	// text-decoration
-    	String textDecoration = style.get(TEXT_DECORATION);
+    	val textDecoration = style.get(TEXT_DECORATION);
     	if (UNDERLINE.equals(textDecoration)) {
-    		font = getFont(cell, font);
+    		font = createFontIfNull(cell, font);
     		font.setUnderline(Font.U_SINGLE);
     	}
 
@@ -115,48 +118,50 @@ public class TextApplier implements CssApplier {
 
     private Map<String, String> parseFontAttr(Map<String, String> style, Map<String, String> mapRtn) {
     	// font
-    	String font = style.get(FONT);
+    	val font = style.get(FONT);
     	if (StringUtils.isNotBlank(font) && 
     			!ArrayUtils.contains(new String[] {
     				"small-caps", "caption",
     				"icon", "menu", "message-box", 
     				"small-caption", "status-bar"
     			}, font)) {
-    		log.debug("Parse Font Attr [{}].", font);
-    		String[] ignoreStyles = new String[] {
+    		log.debug("Parse font attr [{}].", font);
+    		val ignoreStyles = new String[] {
     			"normal",
     			// font weight normal
     			"[1-3]00"
     		};
-    		StringBuffer sbFont = new StringBuffer(
+    		val sbFont = new StringBuffer(
     			font.replaceAll("^|\\s*" + StringUtils.join(ignoreStyles, "|") + "\\s+|$", " "));
-    		log.debug("Font Attr [{}] After Process Ingore.", sbFont);
+    		log.debug("Font attr [{}] after process ignore.", sbFont);
     		// style
-    		Matcher m = Pattern.compile("(?:^|\\s+)(italic|oblique)(?:\\s+|$)")
+    		val matcherStyle = Pattern.compile("(?:^|\\s+)(italic|oblique)(?:\\s+|$)")
     						.matcher(sbFont.toString());
-    		if (m.find()) {
+    		if (matcherStyle.find()) {
     			sbFont.setLength(0);
     			if (log.isDebugEnabled()) {
-    				log.debug("Font Style [{}] Found.", m.group(1));
+    				log.debug("Font style [{}] found.", matcherStyle.group(1));
     			}
     			mapRtn.put(FONT_STYLE, ITALIC);
-    			m.appendReplacement(sbFont, " ");
-    			m.appendTail(sbFont);
+    			matcherStyle.appendReplacement(sbFont, " ");
+    			matcherStyle.appendTail(sbFont);
     		}
+
     		// weight
-    		m = Pattern.compile("(?:^|\\s+)(bold(?:er)?|[7-9]00)(?:\\s+|$)")
+    		val matcherWeight = Pattern.compile("(?:^|\\s+)(bold(?:er)?|[7-9]00)(?:\\s+|$)")
     				.matcher(sbFont.toString());
-    		if (m.find()) {
+    		if (matcherWeight.find()) {
     			sbFont.setLength(0);
     			if (log.isDebugEnabled()) {
-    				log.debug("Font Weight [{}](bold) Found.", m.group(1));
+    				log.debug("Font weight [{}](bold) found.", matcherWeight.group(1));
     			}
     			mapRtn.put(FONT_WEIGHT, BOLD);
-    			m.appendReplacement(sbFont, " ");
-    			m.appendTail(sbFont);
+    			matcherWeight.appendReplacement(sbFont, " ");
+    			matcherWeight.appendTail(sbFont);
     		}
+
     		// size xx-small | x-small | small | medium | large | x-large | xx-large | 18px [/2]
-    		m = Pattern.compile(
+    		val matcherSize = Pattern.compile(
     				// before blank or start
     				new StringBuilder("(?:^|\\s+)")
     				// font size
@@ -172,65 +177,70 @@ public class TextApplier implements CssApplier {
     				.append("(?:\\s+|$)")
     				.toString())
     				.matcher(sbFont.toString());
-    		if (m.find()) {
+    		if (matcherSize.find()) {
     			sbFont.setLength(0);
-    			log.debug("Font Size[/line-height] [{}] Found.", m.group());
-    			String fontSize = m.group(1);
+    			log.debug("Font size[/line-height] [{}] found.", matcherSize.group());
+    			String fontSize = matcherSize.group(1);
     			if (StringUtils.isNotBlank(fontSize)) {
     				fontSize = StringUtils.deleteWhitespace(fontSize);
-    				log.debug("Font Size [{}].", fontSize);
+    				log.debug("Font size [{}].", fontSize);
     				if (fontSize.matches(PATTERN_LENGTH)) {
     					mapRtn.put(FONT_SIZE, fontSize);
     				}
     				else {
-    					log.info("Font Size [{}] Not Supported, Ignore.", fontSize);
+    					log.info("Font size [{}] not supported, ignore.", fontSize);
     				}
     			}
-    			String lineHeight = m.group(2);
+
+    			val lineHeight = matcherSize.group(2);
     			if (StringUtils.isNotBlank(lineHeight)) {
-    				log.info("Line Height [{}] Not Supported, Ignore.", lineHeight);
+    				log.warn("Line height [{}] not supported, ignore.", lineHeight);
     			}
-    			m.appendReplacement(sbFont, " ");
-    			m.appendTail(sbFont);
+    			matcherSize.appendReplacement(sbFont, " ");
+    			matcherSize.appendTail(sbFont);
     		}
     		// font family
     		if (sbFont.length() > 0) {
-    			log.debug("Font Families [{}].", sbFont);
+    			log.debug("Font families [{}].", sbFont);
     			// trim & remove '"
     			String fontFamily = sbFont.toString()
     					.split("\\s*,\\s*")[0].trim().replaceAll("'|\"", "");
-    			log.debug("Use First Font Family [{}].", fontFamily);
+    			log.debug("Use first font family [{}].", fontFamily);
     			mapRtn.put(FONT_FAMILY, fontFamily);
     		}
     	}
-    	font = style.get(FONT_STYLE);
-    	if (ArrayUtils.contains(new String[] {ITALIC, "oblique"}, font)) {
-    		log.debug("Font Italic [{}] Found.", font);
+
+    	val fontStyle = style.get(FONT_STYLE);
+    	if (ArrayUtils.contains(new String[] {ITALIC, "oblique"}, fontStyle)) {
+    		log.debug("Font italic [{}] found.", fontStyle);
     		mapRtn.put(FONT_STYLE, ITALIC);
     	}
-    	font = style.get(FONT_WEIGHT);
-    	if (StringUtils.isNotBlank(font) && 
-    			Pattern.matches("^bold(?:er)?|[7-9]00$", font)) {
-    		log.debug("Font Weight [{}](bold) Found.", font);
+
+    	val fontWeight = style.get(FONT_WEIGHT);
+    	if (StringUtils.isNotBlank(fontWeight) &&
+    			Pattern.matches("^bold(?:er)?|[7-9]00$", fontWeight)) {
+    		log.debug("Font weight [{}](bold) found.", fontWeight);
     		mapRtn.put(FONT_WEIGHT, BOLD);
     	}
-    	font = style.get(FONT_SIZE);
-    	if (CssUtils.isNum(font)) {
-    		log.debug("Font Size [{}] Found.", font);
-    		mapRtn.put(FONT_SIZE, font);
+
+    	val fontSize = style.get(FONT_SIZE);
+    	if (CssUtils.isNum(fontSize)) {
+    		log.debug("Font size [{}] found.", fontSize);
+    		mapRtn.put(FONT_SIZE, fontSize);
     	}
-    	font = style.get(FONT_FAMILY);
-    	if (StringUtils.isNotBlank(font)) {
-    		log.debug("Font Family [{}] Found.", font);
-    		mapRtn.put(FONT_FAMILY, font);
+
+    	val fontFamily = style.get(FONT_FAMILY);
+    	if (StringUtils.isNotBlank(fontFamily)) {
+    		log.debug("Font family [{}] found.", fontFamily);
+    		mapRtn.put(FONT_FAMILY, fontFamily);
     	}
     	return mapRtn;
     }
 
-    HSSFFont getFont(HSSFCell cell, HSSFFont font) {
-    	if (font == null) {
-    		font = cell.getSheet().getWorkbook().createFont();
-    	}
-    	return font;
-    }
+    XSSFFont createFontIfNull(final XSSFCell cell, final XSSFFont font) {
+    	if (font != null) {
+			return font;
+		}
+		return cell.getSheet().getWorkbook().createFont();
+	}
 }

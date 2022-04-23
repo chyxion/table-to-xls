@@ -1,6 +1,4 @@
-.classpath
-.project
-.DS_Store
-.settings/
+.*
+!.gitignore
 logs/
 target/

@@ -1,29 +1,26 @@
 package me.chyxion.xls.css.support;
 
+import lombok.val;
 import java.util.Map;
 import java.util.HashMap;
 import me.chyxion.xls.css.CssUtils;
 import me.chyxion.xls.css.CssApplier;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 5:14:22 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 5:14:22 PM
  */
 public class WidthApplier implements CssApplier {
 
 	/**
 	 * {@inheritDoc}
 	 */
-    public Map<String, String> parse(Map<String, String> style) {
-    	Map<String, String> mapRtn = new HashMap<String, String>();
-    	String width = style.get(WIDTH);
+	@Override
+	public Map<String, String> parse(final Map<String, String> style) {
+    	val mapRtn = new HashMap<String, String>();
+    	val width = style.get(WIDTH);
     	if (CssUtils.isNum(width)) {
     		mapRtn.put(WIDTH, width);
     	}
@@ -33,15 +30,16 @@ public class WidthApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
-    	int width = Math.round(CssUtils.getInt(style.get(WIDTH)) * 2048 / 8.43F);
-    	HSSFSheet sheet = cell.getSheet();
-    	int colIndex = cell.getColumnIndex();
+    @Override
+    public void apply(final XSSFCell cell,
+					  final XSSFCellStyle cellStyle,
+					  final Map<String, String> style) {
+    	val width = Math.round(CssUtils.getInt(style.get(WIDTH)) * 2048 / 8.43F);
+    	val sheet = cell.getSheet();
+    	val colIndex = cell.getColumnIndex();
     	if (width > sheet.getColumnWidth(colIndex)) {
-    		if (width > 255 * 256) {
-    			width = 255 * 256;
-    		}
-    		sheet.setColumnWidth(colIndex, width);
+    		val maxWidth = 255 * 256;
+    		sheet.setColumnWidth(colIndex, width > maxWidth ? maxWidth : width);
     	}
     }
 }

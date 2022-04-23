@@ -1,27 +1,27 @@
 package me.chyxion.xls.css.support;
 
+import lombok.val;
 import java.util.Map;
 import java.util.HashMap;
 import me.chyxion.xls.css.CssApplier;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 2:29:17 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 2:29:17 PM
  */
 public class AlignApplier implements CssApplier {
 
 	/**
 	 * {@inheritDoc}
 	 */
-    public Map<String, String> parse(Map<String, String> style) {
-    	Map<String, String> mapRtn = new HashMap<String, String>();
+	@Override
+    public Map<String, String> parse(final Map<String, String> style) {
+    	val mapRtn = new HashMap<String, String>();
     	String align = style.get(TEXT_ALIGN);
     	if (!ArrayUtils.contains(new String[] {LEFT, CENTER, RIGHT, JUSTIFY}, align)) {
     		align = LEFT;
@@ -38,33 +38,38 @@ public class AlignApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle,
-            Map<String, String> style) {
+	@Override
+	public void apply(final XSSFCell cell,
+					  final XSSFCellStyle cellStyle,
+					  final Map<String, String> style) {
+
     	// text align
-    	String align = style.get(TEXT_ALIGN);
-    	short sAlign = CellStyle.ALIGN_LEFT;
-    	if (RIGHT.equals(align)) {
-    		sAlign = CellStyle.ALIGN_RIGHT;
+    	val shAlign = style.get(TEXT_ALIGN);
+		HorizontalAlignment sAlign = HorizontalAlignment.LEFT;
+    	if (RIGHT.equals(shAlign)) {
+    		sAlign = HorizontalAlignment.RIGHT;
     	}
-    	else if (CENTER.equals(align)) {
-    		sAlign = CellStyle.ALIGN_CENTER;
+    	else if (CENTER.equals(shAlign)) {
+    		sAlign = HorizontalAlignment.CENTER;
     	}
-    	else if (JUSTIFY.equals(align)) {
-    		sAlign = CellStyle.ALIGN_JUSTIFY;
+    	else if (JUSTIFY.equals(shAlign)) {
+    		sAlign = HorizontalAlignment.JUSTIFY;
     	}
     	cellStyle.setAlignment(sAlign);
+
     	// vertical align
-    	align = style.get(VETICAL_ALIGN);
-    	sAlign = CellStyle.VERTICAL_CENTER;
-    	if (TOP.equals(align)) {
-    		sAlign = CellStyle.VERTICAL_TOP;
+    	val svAlign = style.get(VETICAL_ALIGN);
+
+		VerticalAlignment vAlign = VerticalAlignment.CENTER;
+    	if (TOP.equals(svAlign)) {
+			vAlign = VerticalAlignment.TOP;
     	}
-    	else if (BOTTOM.equals(align)) {
-    		sAlign = CellStyle.VERTICAL_BOTTOM;
+    	else if (BOTTOM.equals(svAlign)) {
+    		vAlign = VerticalAlignment.BOTTOM;
     	}
-    	else if (JUSTIFY.equals(align)) {
-    		sAlign = CellStyle.VERTICAL_JUSTIFY;
+    	else if (JUSTIFY.equals(svAlign)) {
+    		vAlign = VerticalAlignment.JUSTIFY;
     	}
-    	cellStyle.setVerticalAlignment(sAlign);
+    	cellStyle.setVerticalAlignment(vAlign);
     }
 }

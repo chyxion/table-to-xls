@@ -1,43 +1,42 @@
 package me.chyxion.xls.css.support;
 
+import lombok.val;
 import java.util.Map;
 import java.util.HashMap;
 import me.chyxion.xls.css.CssUtils;
 import me.chyxion.xls.css.CssApplier;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
- * @version 0.0.1
- * @since 0.0.1
- * @author Shaun Chyxion <br>
- * chyxion@163.com <br>
- * Oct 24, 2014 5:03:32 PM
+ * @author Shaun Chyxion
+ * @date Oct 24, 2014 5:03:32 PM
  */
 public class BackgroundApplier implements CssApplier {
 
 	/**
 	 * {@inheritDoc}
 	 */
-    public Map<String, String> parse(Map<String, String> style) {
-    	Map<String, String> mapRtn = new HashMap<String, String>();
+	@Override
+    public Map<String, String> parse(final Map<String, String> style) {
+    	val mapRtn = new HashMap<String, String>();
     	String bg = style.get(BACKGROUND);
     	String bgColor = null;
     	if (StringUtils.isNotBlank(bg)) {
-    		for (String bgAttr : bg.split("(?<=\\)|\\w|%)\\s+(?=\\w)")) {
+    		for (val bgAttr : bg.split("(?<=\\)|\\w|%)\\s+(?=\\w)")) {
     			if ((bgColor = CssUtils.processColor(bgAttr)) != null) {
     				mapRtn.put(BACKGROUND_COLOR, bgColor);
     				break;
     			}
     		}
     	}
+
     	bg = style.get(BACKGROUND_COLOR);
-    	if (StringUtils.isNotBlank(bg) && 
+    	if (StringUtils.isNotBlank(bg) &&
     			(bgColor = CssUtils.processColor(bg)) != null) {
     		mapRtn.put(BACKGROUND_COLOR, bgColor);
-    		
     	}
     	if (bgColor != null) {
     		bgColor = mapRtn.get(BACKGROUND_COLOR);
@@ -51,13 +50,15 @@ public class BackgroundApplier implements CssApplier {
     /**
      * {@inheritDoc}
      */
-    public void apply(HSSFCell cell, HSSFCellStyle cellStyle, Map<String, String> style) {
-    	String bgColor = style.get(BACKGROUND_COLOR);
+	@Override
+	public void apply(final XSSFCell cell,
+					  final XSSFCellStyle cellStyle,
+					  final Map<String, String> style) {
+
+    	val bgColor = style.get(BACKGROUND_COLOR);
     	if (StringUtils.isNotBlank(bgColor)) {
-    		cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
-    		cellStyle.setFillForegroundColor(
-    			CssUtils.parseColor(cell.getSheet().getWorkbook(), 
-    					bgColor).getIndex());
+    		cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    		cellStyle.setFillForegroundColor(CssUtils.parseColor(bgColor));
     	}
     }
 }
