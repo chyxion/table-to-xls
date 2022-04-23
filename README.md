@@ -13,7 +13,7 @@ Result
 <dependency>
     <groupId>me.chyxion</groupId>
     <artifactId>table-to-xls</artifactId>
-    <version>0.0.1-RELEASE</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
