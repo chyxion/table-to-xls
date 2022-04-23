@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.chyxion</groupId>
     <artifactId>table-to-xls</artifactId>
-    <version>0.0.1-RELEASE</version>
+    <version>0.0.2</version>
     <name>Table To XLS</name>
     <description>Convert HTML Table To Excel</description>
     <url>https://github.com/chyxion/table-to-xls</url>
@@ -33,12 +33,6 @@
         <connection>scm:git:https://github.com/chyxion/table-to-xls.git</connection>
         <developerConnection>scm:git:git@github.com:chyxion/table-to-xls.git</developerConnection>
     </scm>
-
-    <parent>
-        <groupId>me.chyxion</groupId>
-        <artifactId>maven-parent</artifactId>
-        <version>0.0.1-RELEASE</version>
-    </parent>
 
 	<properties>
         <maven.compiler.source>1.8</maven.compiler.source>
